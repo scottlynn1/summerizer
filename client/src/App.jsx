@@ -5,24 +5,19 @@ import './App.css'
 
 function MyForm() {
   const [years, setYears] = useState({start: '2006', end: '2024'});
-  const [state, setState] = useState('');
+  const [state, setState] = useState('all');
   const [ratings, setRatings] = useState([]);
   const [product, setProduct] = useState('');
   const [posts, setPosts] = useState([]);
 
-  const summary = (years, state, ratings, product) => {
+  const summary = (object) => {
     fetch('https://127.0.0.1:5173', {
       method: 'POST',
-      body: JSON.stringify({
-         years: years,
-         state: state,
-         ratings: ratings,
-         product: product
-      }),
+      body: JSON.stringify(object),
       headers: {
          'Content-type': 'application/json; charset=UTF-8',
-      }
-    }).then((response) => response.json()).then((data) => {
+      },
+   }).then((response) => response.json()).then((data) => {
           console.log(data);
           setPosts(data);
         })
@@ -34,8 +29,8 @@ function MyForm() {
 
     const handleSubmit = (e) => {
       e.preventDefault();
-      console.log(ratings, years)
-      // summary(dates, states, ratings, product);
+      console.log({years, state, ratings})
+      summary({years, state, ratings});
     };
 
     const onCheckbox = (e) => {
@@ -62,8 +57,11 @@ function MyForm() {
       console.log(years)
     };
 
+    const onStateselect = (e) => setState(e.target.value)
+
+
   return (
-    <form className='flex flex-col'>
+    <form onSubmit={handleSubmit} className='flex flex-col'>
       <div>
         <p>Date Range</p>
         <label for='start'>Starting Year</label>
@@ -115,8 +113,59 @@ function MyForm() {
       </div>
 
       <label for='state'>State</label>
-      <input className='border' id='state' name='state'></input>
-
+      <select onChange={onStateselect} className='border p-2 rounded-s-sx' id="state" name='state'>
+        <option value='all'>All</option>
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
       <fieldset>
       <legend>Select Review Ratings</legend>
       <div className='flex justify-between'>
@@ -150,7 +199,7 @@ function MyForm() {
         <option value="drivethru">The Drive Through</option>
       </select>
 
-      <button onClick={handleSubmit} className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='button'>Submit</button>
+      <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>Submit</button>
     </form>
   );
 }
