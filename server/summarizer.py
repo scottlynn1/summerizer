@@ -9,10 +9,9 @@ from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import psycopg2
 from dotenv import load_dotenv
-
 load_dotenv()
 
-GROQ_API_KEY = os.environ.get('groq_key')
+GROQ_API_KEY = env('groq_key')
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 
 nest_asyncio.apply()
@@ -25,7 +24,7 @@ Settings.embed_model = HuggingFaceEmbedding()
 conn = psycopg2.connect(database = "starbucksproject", 
                           user = "scott", 
                           host = 'localhost',
-                          password = os.environ.get('pg_password'),
+                          password = env('pg_password'),
                           port = 5432
                         )
 cur = conn.cursor()
