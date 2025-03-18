@@ -11,7 +11,7 @@ import psycopg2
 from dotenv import load_dotenv
 load_dotenv()
 
-GROQ_API_KEY = env('groq_key')
+GROQ_API_KEY = os.environ.get('groq_key')
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 
 nest_asyncio.apply()

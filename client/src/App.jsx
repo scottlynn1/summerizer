@@ -3,20 +3,34 @@ import Chart from 'chart.js/auto'
 import { Bar } from 'react-chartjs-2';
 import './App.css'
 
+const API_HOST = 'http://localhost:8000';
+let _csrfToken = null;
+
+async function getCsrfToken() {
+  if (_csrfToken === null) {
+    const response = await fetch('http://127.0.0.1:8000/csrf/', {
+      credentials: 'include',
+    });
+    const data = await response.json();
+    _csrfToken = data.csrfToken;
+  }
+  console.log(_csrfToken)
+  return _csrfToken
+}
+
 function MyForm() {
   const [years, setYears] = useState({start: '2006', end: '2024'});
   const [state, setState] = useState('all');
   const [ratings, setRatings] = useState([]);
-  const [product, setProduct] = useState('');
+  //const [product, setProduct] = useState('');
   const [posts, setPosts] = useState([]);
 
-  const summary = (object) => {
-    fetch('https://127.0.0.1:5173', {
+  const summary = async (object) => {
+    fetch('http://127.0.0.1:8000/api/', {
       method: 'POST',
       body: JSON.stringify(object),
-      headers: {
-         'Content-type': 'application/json; charset=UTF-8',
-      },
+      headers: {'X-CSRFToken': await getCsrfToken(), 'Content-type': 'application/json; charset=UTF-8'},
+      credentials: 'include'
    }).then((response) => response.json()).then((data) => {
           console.log(data);
           setPosts(data);
