@@ -14,7 +14,6 @@ async function getCsrfToken() {
     const data = await response.json();
     _csrfToken = data.csrfToken;
   }
-  console.log(_csrfToken)
   return _csrfToken
 }
 
@@ -64,6 +63,14 @@ function MyForm() {
     };
 
     const onDateselect = (e) => {
+      if (e.target.id === 'start' && Number(e.target.value) > Number(years['end'])) {
+        console.log("start date can not be higher than end date")
+        return
+      }
+      if (e.target.id === 'end' && Number(e.target.value) < Number(years['start'])) {
+        console.log("start date can not be higher than end date")
+        return
+      }
       setYears((years) => {
         years[e.target.id] = e.target.value;
         return years;

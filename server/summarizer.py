@@ -30,7 +30,7 @@ conn = psycopg2.connect(database = "starbucksproject",
 cur = conn.cursor()
 
 try:
-  cur.execute("SELECT review FROM reviews WHERE rating = 1 LIMIT 20;")
+  cur.execute("SELECT review FROM reviews WHERE rating = 1 AND address = 'FL' LIMIT 50;")
   text = ''
   for row in cur:
     text = text + ' ' + row[0]
@@ -54,5 +54,5 @@ summary_query_engine = summary_index.as_query_engine(
     use_async=True,
 )
 
-response = summary_query_engine.query("Summarize the given reviews of Starbucks")
+response = summary_query_engine.query("What are the top 3 most common complaints from these reviews?")
 print(response)
