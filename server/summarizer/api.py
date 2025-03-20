@@ -36,16 +36,27 @@ Settings.embed_model = HuggingFaceEmbedding()
 
 @api.post("/")
 def hello(request, data: ParamsSchema):
+  data.years['start'] = data.years['start'] + '-01-01'
+  data.years['end'] = data.years['end'] + '-12-31'
   print(data.years)
   print(data.state)
   print(data.ratings)
 
   nodes = []
   with connection.cursor() as cursor:
-    cursor.execute("SELECT review FROM reviews WHERE rating=%s AND address='AK' LIMIT 50;", [data.ratings[0]])
-    for review in cursor:
-      print(review[0])
-      nodes.append(TextNode(text=review[0]))
+    if data.state == 'all':
+      cursor.execute("SELECT review, date FROM reviews WHERE rating=%s AND date BETWEEN %s AND %s LIMIT 50;", [data.ratings[0], data.years['start'], data.years['end']])
+      for review in cursor:
+        print(review)
+        nodes.append(TextNode(text=review[0]))
+    else:
+      cursor.execute(
+        "SELECT review, address, date FROM reviews "
+        "WHERE rating=%s AND date "
+        "BETWEEN %s AND %s AND address=%s LIMIT 50;", [data.ratings[0], data.years['start'], data.years['end'], data.state])
+      for review in cursor:
+        print(review)
+        nodes.append(TextNode(text=review[0]))
 
     
   summary_index = SummaryIndex(nodes)
