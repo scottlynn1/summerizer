@@ -25,18 +25,22 @@ function MyForm() {
   const [summary, setSummary] = useState([]);
   const [yearserror, setYearserror] = useState('none')
   const [failsubmit, setFailsumbit] = useState('')
+  const [loading, setLoading] = useState('none')
 
   const getSummary = async (object) => {
+    setLoading('block')
     fetch('http://127.0.0.1:8000/api/', {
       method: 'POST',
       body: JSON.stringify(object),
       headers: {'X-CSRFToken': await getCsrfToken(), 'Content-type': 'application/json; charset=UTF-8'},
       credentials: 'include'
    }).then((response) => response.json()).then((data) => {
+          setLoading('none');
           console.log(data);
           setSummary(data['db']);
         })
         .catch((err) => {
+          setLoading('none');
           console.log(err.message);
         }
       )
@@ -235,7 +239,11 @@ function MyForm() {
           <option value="drivethru">The Drive Through</option>
         </select>
 
-        <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>Submit</button>
+        <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>
+          <div className='flex justify-center'>
+            <div style={{display: loading}} className='animate-spin bg-sky-100 mr-2 rounded-full border-t-indigo-500 border-t-3 h-8 w-8'></div><div className='p-2'>Submit</div>
+          </div>
+        </button>
       </form>
       <MySummary summary={summary}/>
     </div>
