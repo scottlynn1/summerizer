@@ -18,11 +18,13 @@ async function getCsrfToken() {
 }
 
 function MyForm() {
-  const [years, setYears] = useState({start: '2006', end: '2024'});
+  const [years, setYears] = useState({'start': '2006', 'end': '2024'});
   const [state, setState] = useState('all');
   const [ratings, setRatings] = useState([]);
   //const [product, setProduct] = useState('');
   const [summary, setSummary] = useState([]);
+  const [yearserror, setYearserror] = useState('none')
+  const [failsubmit, setFailsumbit] = useState('')
 
   const getSummary = async (object) => {
     fetch('http://127.0.0.1:8000/api/', {
@@ -40,45 +42,56 @@ function MyForm() {
       )
     };
 
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log({years, state, ratings})
-      getSummary({years, state, ratings});
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log({years, state, ratings})
+    if (Number(years.end) < Number(years.start)) {
+      setFailsumbit('text-red-500')
+      return
+    }
+    getSummary({years, state, ratings});
+  };
 
-    const onCheckbox = (e) => {
-      if (e.target.checked) {
-        setRatings((ratings) => [e.target.value, ...ratings]);
-      }
-      else {
-        setRatings(() => {
-          const index = ratings.indexOf(e.target.value);
-          if (index > -1) {
-            ratings.splice(index, 1);
-          }
-          return ratings
-        })
-      }
-      console.log(e.target.value)
-    };
+  const onCheckbox = (e) => {
+    if (e.target.checked) {
+      setRatings((ratings) => [e.target.value, ...ratings]);
+    }
+    else {
+      setRatings(() => {
+        const index = ratings.indexOf(e.target.value);
+        if (index > -1) {
+          ratings.splice(index, 1);
+        }
+        return ratings
+      })
+    }
+  };
 
-    const onDateselect = (e) => {
-      if (e.target.id === 'start' && Number(e.target.value) > Number(years['end'])) {
-        console.log("start date can not be higher than end date")
-        return
+  const onDateselect = (e) => {
+    if (e.target.id == 'start') {
+      setYears({...years, 'start': e.target.value})
+      if (Number(years.end) < Number(e.target.value)) {
+        console.log('show')
+        setYearserror('block')
+      } else {
+        console.log('hide')
+        setYearserror('none')
       }
-      if (e.target.id === 'end' && Number(e.target.value) < Number(years['start'])) {
-        console.log("start date can not be higher than end date")
-        return
+    }
+    if (e.target.id == 'end') {
+      setYears({...years, 'end': e.target.value})
+      if (Number(e.target.value) < Number(years.start)) {
+        console.log('show')
+        setYearserror('block')
+      } else {
+        console.log('hide')
+        setYearserror('none')
       }
-      setYears((years) => {
-        years[e.target.id] = e.target.value;
-        return years;
-      });
-      console.log(years)
-    };
+    }
+    console.log(years)
+  };
 
-    const onStateselect = (e) => setState(e.target.value)
+  const onStateselect = (e) => setState(e.target.value)
 
 
   return (
@@ -86,6 +99,7 @@ function MyForm() {
       <form onSubmit={handleSubmit} className='flex flex-col'>
         <div>
           <p>Date Range</p>
+          <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
           <label for='start'>Starting Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
             <option value="2006">Year</option>
