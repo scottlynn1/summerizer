@@ -39,6 +39,7 @@ function MyForm() {
           setLoading('none');
           console.log(data);
           setSummary(data['db']);
+          // loadChart(data['chartdata']);
         })
         .catch((err) => {
           setLoading('none');
@@ -46,6 +47,7 @@ function MyForm() {
         }
       )
     };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -260,6 +262,11 @@ function MyForm() {
     </div>
   );
 }
+
+
+
+
+
 
 function MySummary({summary}) {
   return (
