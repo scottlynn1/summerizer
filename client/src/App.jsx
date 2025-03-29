@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Chart from 'chart.js/auto'
 import { Bar } from 'react-chartjs-2';
 import './App.css'
@@ -17,16 +17,10 @@ async function getCsrfToken() {
   return _csrfToken
 }
 
-function MyForm() {
-  const [years, setYears] = useState({'start': '2006', 'end': '2024'});
-  const [state, setState] = useState('all');
-  const [ratings, setRatings] = useState([]);
-  const [product, setProduct] = useState('');
+function ContainerComp() {
   const [summary, setSummary] = useState([]);
-  const [yearserror, setYearserror] = useState('none')
-  const [failsubmit, setFailsumbit] = useState('')
-  const [loading, setLoading] = useState('none')
-  const [selyears, setSelyears] = useState('')
+  const [loading, setLoading] = useState('none');
+  const [chartdata, setChartdata] = useState({});
 
   const getSummary = async (object) => {
     setLoading('block')
@@ -39,7 +33,8 @@ function MyForm() {
           setLoading('none');
           console.log(data);
           setSummary(data['db']);
-          // loadChart(data['chartdata']);
+          
+          setChartdata(data['chartdata']);
         })
         .catch((err) => {
           setLoading('none');
@@ -47,6 +42,27 @@ function MyForm() {
         }
       )
     };
+
+
+  return (
+    <>
+      <MyForm loading={loading} getSummary={getSummary}/>
+      <MySummary summary={summary}/>
+      <MyChart chartdata={chartdata}/>
+    </>
+  )
+}
+
+
+function MyForm({loading, getSummary}) {
+  const [years, setYears] = useState({'start': '2006', 'end': '2024'});
+  const [state, setState] = useState('all');
+  const [ratings, setRatings] = useState([]);
+  const [product, setProduct] = useState('');
+  const [yearserror, setYearserror] = useState('none')
+  const [failsubmit, setFailsumbit] = useState('')
+  const [selyears, setSelyears] = useState('')
+
 
 
   const handleSubmit = (e) => {
@@ -119,7 +135,6 @@ function MyForm() {
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
           <label for='start'>Starting Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
-            <option value="2006">Year</option>
             <option value="2006">2006</option>
             <option value="2007">2007</option>
             <option value="2008">2008</option>
@@ -141,8 +156,7 @@ function MyForm() {
             <option value="2024">2024</option>
           </select>
           <label for='end'>Ending Year</label>
-          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end'>
-            <option value="2024">Year</option>
+          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value='2024'>
             <option value="2006">2006</option>
             <option value="2007">2007</option>
             <option value="2008">2008</option>
@@ -258,7 +272,6 @@ function MyForm() {
           </div>
         </button>
       </form>
-      <MySummary summary={summary}/>
     </div>
   );
 }
@@ -287,7 +300,7 @@ function MyReviews() {
   )
 }
 
-function MyChart() {
+function MyChart({chartdata}) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -302,17 +315,12 @@ function MyChart() {
     },
   };
   const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: Object.keys(chartdata),
     datasets: [
       {
         label: 'Dataset 1',
-        data: [1,2,3,4,5,6],
+        data: Object.values(chartdata),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
-      {
-        label: 'Dataset 2',
-        data: [1,2,3,4,5,6],
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },
     ],
   };
@@ -326,8 +334,7 @@ function MyChart() {
 function App() {
   return (
     <>
-      <MyForm />
-      <MyChart />
+      <ContainerComp />
     </>
   )
 }
