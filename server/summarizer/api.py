@@ -40,20 +40,23 @@ def hello(request, data: ParamsSchema):
   data.years['end'] = data.years['end'] + '-12-31'
   print(data.years)
   print(data.state)
-  print(data.ratings)
+  ratings = []
+  for rating in data.ratings:
+    int_rating = int(rating)
+    ratings.append(int_rating)
 
   nodes = []
   with connection.cursor() as cursor:
     if data.state == 'all':
-      cursor.execute("SELECT review, date FROM reviews WHERE rating=%s AND date BETWEEN %s AND %s LIMIT 50;", [data.ratings[0], data.years['start'], data.years['end']])
+      cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 50;", [ratings, data.years['start'], data.years['end']])
       for review in cursor:
         print(review)
         nodes.append(TextNode(text=review[0]))
     else:
       cursor.execute(
-        "SELECT review, address, date FROM reviews "
-        "WHERE rating=%s AND date "
-        "BETWEEN %s AND %s AND address=%s LIMIT 50;", [data.ratings[0], data.years['start'], data.years['end'], data.state])
+        "SELECT review, address, date, rating FROM reviews "
+        "WHERE rating=ANY(%s) AND date "
+        "BETWEEN %s AND %s AND address=%s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state])
       for review in cursor:
         print(review)
         nodes.append(TextNode(text=review[0]))

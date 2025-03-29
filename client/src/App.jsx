@@ -26,6 +26,7 @@ function MyForm() {
   const [yearserror, setYearserror] = useState('none')
   const [failsubmit, setFailsumbit] = useState('')
   const [loading, setLoading] = useState('none')
+  const [selyears, setSelyears] = useState('')
 
   const getSummary = async (object) => {
     setLoading('block')
@@ -49,14 +50,23 @@ function MyForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({years, state, ratings})
+    let fail = false
     if (Number(years.end) < Number(years.start)) {
       setFailsumbit('text-red-500')
+      fail = true
+    }
+    if (ratings.length == 0) {
+      setSelyears('text-red-500')
+      fail = true
+    }
+    if (fail) {
       return
     }
     getSummary({years, state, ratings});
   };
 
   const onCheckbox = (e) => {
+    setSelyears('')
     if (e.target.checked) {
       setRatings((ratings) => [e.target.value, ...ratings]);
     }
@@ -207,7 +217,7 @@ function MyForm() {
           <option value="WY">Wyoming</option>
         </select>
         <fieldset>
-        <legend>Select Review Ratings</legend>
+        <legend className={selyears}>Select Review Ratings</legend>
         <div className='flex justify-between'>
           <div>
             <input className='m-1' onChange={onCheckbox} type="checkbox" id='rating1' name="ratings" value="1" />
