@@ -22,6 +22,7 @@ class ParamsSchema(Schema):
   years: dict[str, str]
   state: str
   ratings: list[str]
+  product: str
 
 
 GROQ_API_KEY = os.environ.get('groq_key')
@@ -38,8 +39,7 @@ Settings.embed_model = HuggingFaceEmbedding()
 def hello(request, data: ParamsSchema):
   data.years['start'] = data.years['start'] + '-01-01'
   data.years['end'] = data.years['end'] + '-12-31'
-  print(data.years)
-  print(data.state)
+
   ratings = []
   for rating in data.ratings:
     int_rating = int(rating)
@@ -47,19 +47,34 @@ def hello(request, data: ParamsSchema):
 
   nodes = []
   with connection.cursor() as cursor:
-    if data.state == 'all':
-      cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 50;", [ratings, data.years['start'], data.years['end']])
-      for review in cursor:
-        print(review)
-        nodes.append(TextNode(text=review[0]))
+    if data.product:
+      if data.state == 'all':
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT 50;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
+        for review in cursor:
+          print(review)
+          nodes.append(TextNode(text=review[0]))
+      else:
+        cursor.execute(
+          "SELECT review, address, date, rating FROM reviews "
+          "WHERE rating=ANY(%s) AND date "
+          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
+        for review in cursor:
+          print(review)
+          nodes.append(TextNode(text=review[0]))
     else:
-      cursor.execute(
-        "SELECT review, address, date, rating FROM reviews "
-        "WHERE rating=ANY(%s) AND date "
-        "BETWEEN %s AND %s AND address=%s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state])
-      for review in cursor:
-        print(review)
-        nodes.append(TextNode(text=review[0]))
+      if data.state == 'all':
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 50;", [ratings, data.years['start'], data.years['end']])
+        for review in cursor:
+          print(review)
+          nodes.append(TextNode(text=review[0]))
+      else:
+        cursor.execute(
+          "SELECT review, address, date, rating FROM reviews "
+          "WHERE rating=ANY(%s) AND date "
+          "BETWEEN %s AND %s AND address=%s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state])
+        for review in cursor:
+          print(review)
+          nodes.append(TextNode(text=review[0]))
 
     
   summary_index = SummaryIndex(nodes)
@@ -68,9 +83,11 @@ def hello(request, data: ParamsSchema):
     response_mode="tree_summarize",
     use_async=True,
   )
+  if data.product:
+    summary = summary_query_engine.query(f"What are the overall issues of the {data.product} from these reviews about a coffee chain?")
+    print('product summary' + str(summary))
+  else:
+    summary = summary_query_engine.query("What is the overall perception of the coffee chain from these reviews are about?")
+    print('store summary' + str(summary))
 
-  summary = summary_query_engine.query("What is the overall perception of the coffee chain from these reviews are about?")
-  print(summary)
-
-  # print(Reviews.objects.get(pk=1))
   return JsonResponse({'db': str(summary)})

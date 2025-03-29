@@ -21,7 +21,7 @@ function MyForm() {
   const [years, setYears] = useState({'start': '2006', 'end': '2024'});
   const [state, setState] = useState('all');
   const [ratings, setRatings] = useState([]);
-  //const [product, setProduct] = useState('');
+  const [product, setProduct] = useState('');
   const [summary, setSummary] = useState([]);
   const [yearserror, setYearserror] = useState('none')
   const [failsubmit, setFailsumbit] = useState('')
@@ -49,7 +49,7 @@ function MyForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({years, state, ratings})
+    console.log({years, state, ratings, product})
     let fail = false
     if (Number(years.end) < Number(years.start)) {
       setFailsumbit('text-red-500')
@@ -62,7 +62,7 @@ function MyForm() {
     if (fail) {
       return
     }
-    getSummary({years, state, ratings});
+    getSummary({years, state, ratings, product});
   };
 
   const onCheckbox = (e) => {
@@ -107,6 +107,7 @@ function MyForm() {
 
   const onStateselect = (e) => setState(e.target.value)
 
+  const productSelect = (e) => setProduct(e.target.value)
 
   return (
     <div>
@@ -242,11 +243,11 @@ function MyForm() {
         </div>
         </fieldset>
         <label for='product'>Product/Service</label>
-        <select className='border p-2 rounded-s-sx' id="product" name='product'>
+        <select onChange={productSelect} className='border p-2 rounded-s-sx' id="product" name='product'>
           <option value="">Choose a Product/Service</option>
-          <option value="whitechocolatemocha">White Chocolate Mocha</option>
-          <option value="pumpkinspicelatte">Pumpkin Spice Latte</option>
-          <option value="drivethru">The Drive Through</option>
+          <option value="white chocolate mocha">White Chocolate Mocha</option>
+          <option value="pumpkin spice latte">Pumpkin Spice Latte</option>
+          <option value="drive thru">The Drive Through</option>
         </select>
 
         <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>
