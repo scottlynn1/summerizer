@@ -47,10 +47,20 @@ function ContainerComp() {
 
   return (
     <>
-      <MyForm loading={loading} getSummary={getSummary}/>
-      <MySummary summary={summary}/>
-      <MyChart chartdata={chartdata}/>
-      <MyChart1 chartdata1={chartdata1}/>
+      <div className='flex flex-col'>
+        <div className='flex min-[1240px]:flex-row flex-col items-center justify-center'>
+          <div className='min-w-[400px] max-w-[400px] min-[1240px]:ml-auto'>
+            <MyForm loading={loading} getSummary={getSummary}/>
+          </div>
+          <div className='w-full max-w-[750px] min-h-[420px] border mx-auto my-2 rounded-md'>
+            <MySummary summary={summary}/>
+          </div>
+        </div>
+        <div className='flex min-[1240px]:flex-row flex-col'>
+            <MyChart chartdata={chartdata}/>
+            <MyChart1 chartdata1={chartdata1}/>
+        </div>
+      </div>
     </>
   )
 }
@@ -130,8 +140,8 @@ function MyForm({loading, getSummary}) {
   const productSelect = (e) => setProduct(e.target.value)
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className='flex flex-col'>
+    <div className='max-w-[400px] m-auto'>
+      <form onSubmit={handleSubmit} className='flex flex-col text-center'>
         <div>
           <p>Date Range</p>
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
@@ -299,7 +309,7 @@ function MyForm({loading, getSummary}) {
 function MySummary({summary}) {
   return (
     <>
-      <div className='w-[400px] aspect-16/9 border m-2'>
+      <div className=''>
         {summary}
       </div>
     </>
@@ -336,14 +346,14 @@ function MyChart({chartdata}) {
     labels: Object.keys(chartdata),
     datasets: [
       {
-        label: 'Average Ratings',
+        label: 'Average Ratings by Year',
         data: Object.values(chartdata),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
   };
   return(
-    <div className='w-full max-w-[1000px] min-h-[0px] h-auto aspect-16/9'>
+    <div className='w-full min-[1240px]:max-w-1/2 min-h-[0px] h-auto aspect-16/9'>
       <Bar options={options} data={data} />
     </div>
   )
@@ -360,9 +370,8 @@ function MyChart1({chartdata1}) {
     },
     scales: {
       y: {
-        type: 'linear', // For numeric data (use 'time' for date values)
-        min: 0,       // Minimum x-axis value
-        max: 5,       // Maximum x-axis value
+        type: 'linear', 
+        min: 0,       
       },
     },
   };
@@ -370,14 +379,14 @@ function MyChart1({chartdata1}) {
     labels: Object.keys(chartdata1),
     datasets: [
       {
-        label: 'Average Ratings',
+        label: 'Average Ratings by State',
         data: Object.values(chartdata1),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
   };
   return(
-    <div className='w-full max-w-[1000px] min-h-[0px] h-auto aspect-16/9'>
+    <div className='w-full min-[1240px]:max-w-1/2 min-h-[0px] h-auto aspect-16/9'>
       <Bar options={options} data={data} />
     </div>
   )
