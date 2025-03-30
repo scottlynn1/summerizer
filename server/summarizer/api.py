@@ -45,6 +45,7 @@ def hello(request, data: ParamsSchema):
     int_rating = int(rating)
     ratings.append(int_rating)
   chartdata = {}
+  chartdata1 = {}
   nodes = []
   with connection.cursor() as cursor:
     if data.product:
@@ -52,10 +53,14 @@ def hello(request, data: ParamsSchema):
         cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
-        cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
-        for average in cursor:
-          chartdata[str(average[1])] = float(average[0])
-          print(chartdata)
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
+          for average in cursor:
+            chartdata[str(average[1])] = float(average[0])
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, address FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s GROUP BY address ORDER BY avg DESC;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
+          for average in cursor:
+            chartdata1[str(average[1])] = float(average[0])
       else:
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
@@ -63,19 +68,23 @@ def hello(request, data: ParamsSchema):
           "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
-        cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
-        for average in cursor:
-          chartdata[str(average[1])] = float(average[0])
-          print(chartdata)
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
+          for average in cursor:
+            chartdata[str(average[1])] = float(average[0])
     else:
       if data.state == 'all':
         cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 150;", [ratings, data.years['start'], data.years['end']])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
-        cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end']])
-        for average in cursor:
-          chartdata[str(average[1])] = float(average[0])
-          print(chartdata)
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end']])
+          for average in cursor:
+            chartdata[str(average[1])] = float(average[0])
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, address FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s GROUP BY address ORDER BY avg DESC;", [ratings, data.years['start'], data.years['end']])
+          for average in cursor:
+            chartdata1[str(average[1])] = float(average[0])
       else:
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
@@ -83,11 +92,10 @@ def hello(request, data: ParamsSchema):
           "BETWEEN %s AND %s AND address=%s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
-        cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state])
-        for average in cursor:
-          print(average)
-          chartdata[str(average[1])] = float(average[0])
-          print(chartdata)
+        if len(ratings) > 1:
+          cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state])
+          for average in cursor:
+            chartdata[str(average[1])] = float(average[0])
 
     
   summary_index = SummaryIndex(nodes)
@@ -104,4 +112,4 @@ def hello(request, data: ParamsSchema):
     summary = summary_query_engine.query("What are the overall issues or things people like of the coffee chain from these reviews are about?")
     print('store summary' + str(summary))
 
-  return JsonResponse({'db': str(summary), 'chartdata': chartdata})
+  return JsonResponse({'db': str(summary), 'chartdata': chartdata, 'chartdata1': chartdata1})

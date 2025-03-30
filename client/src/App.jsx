@@ -21,6 +21,7 @@ function ContainerComp() {
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState('none');
   const [chartdata, setChartdata] = useState({});
+  const [chartdata1, setChartdata1] = useState({});
 
   const getSummary = async (object) => {
     setLoading('block')
@@ -33,7 +34,7 @@ function ContainerComp() {
           setLoading('none');
           console.log(data);
           setSummary(data['db']);
-          
+          setChartdata1(data['chartdata1']);
           setChartdata(data['chartdata']);
         })
         .catch((err) => {
@@ -49,6 +50,7 @@ function ContainerComp() {
       <MyForm loading={loading} getSummary={getSummary}/>
       <MySummary summary={summary}/>
       <MyChart chartdata={chartdata}/>
+      <MyChart1 chartdata1={chartdata1}/>
     </>
   )
 }
@@ -321,9 +323,12 @@ function MyChart({chartdata}) {
       legend: {
         position: 'top',
       },
-      title: {
-        display: true,
-        text: 'Chart.js Bar Chart',
+    },
+    scales: {
+      y: {
+        type: 'linear', // For numeric data (use 'time' for date values)
+        min: 0,       // Minimum x-axis value
+        max: 5,       // Maximum x-axis value
       },
     },
   };
@@ -331,8 +336,42 @@ function MyChart({chartdata}) {
     labels: Object.keys(chartdata),
     datasets: [
       {
-        label: 'Dataset 1',
+        label: 'Average Ratings',
         data: Object.values(chartdata),
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      },
+    ],
+  };
+  return(
+    <div className='w-full max-w-[1000px] min-h-[0px] h-auto aspect-16/9'>
+      <Bar options={options} data={data} />
+    </div>
+  )
+}
+
+function MyChart1({chartdata1}) {
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        type: 'linear', // For numeric data (use 'time' for date values)
+        min: 0,       // Minimum x-axis value
+        max: 5,       // Maximum x-axis value
+      },
+    },
+  };
+  const data = {
+    labels: Object.keys(chartdata1),
+    datasets: [
+      {
+        label: 'Average Ratings',
+        data: Object.values(chartdata1),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
