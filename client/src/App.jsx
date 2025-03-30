@@ -47,12 +47,13 @@ function ContainerComp() {
 
   return (
     <>
-      <div className='flex flex-col'>
+      <div className='flex flex-col bg-sky-50'>
+        <div className='text-center text-3xl p-2 bg-blue-100'>User interface to query review database to obtain high level overview and product level details</div>
         <div className='flex min-[1240px]:flex-row flex-col items-center justify-center'>
-          <div className='min-w-[400px] max-w-[400px] min-[1240px]:ml-auto'>
+          <div className='min-w-[400px] max-w-[400px] min-[1240px]:ml-auto border rounded-md p-2'>
             <MyForm loading={loading} getSummary={getSummary}/>
           </div>
-          <div className='w-full max-w-[750px] min-h-[420px] border mx-auto my-2 rounded-md'>
+          <div className='w-full max-w-[750px] min-h-[380px] border mx-auto my-2 rounded-md'>
             <MySummary summary={summary}/>
           </div>
         </div>
@@ -142,10 +143,10 @@ function MyForm({loading, getSummary}) {
   return (
     <div className='max-w-[400px] m-auto'>
       <form onSubmit={handleSubmit} className='flex flex-col text-center'>
-        <div>
+        <div className='p-2'>
           <p>Date Range</p>
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
-          <label for='start'>Starting Year</label>
+          <label className='m-1' for='start'>Starting Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
             <option value="2006">2006</option>
             <option value="2007">2007</option>
@@ -167,7 +168,7 @@ function MyForm({loading, getSummary}) {
             <option value="2023">2023</option>
             <option value="2024">2024</option>
           </select>
-          <label for='end'>Ending Year</label>
+          <label className='m-1' for='end'>Ending Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value='2024'>
             <option value="2006">2006</option>
             <option value="2007">2007</option>
@@ -190,8 +191,8 @@ function MyForm({loading, getSummary}) {
             <option value="2024">2024</option>
           </select>
         </div>
-
-        <label for='state'>State</label>
+        <div className='p-2'>
+        <label className='p-2' for='state'>State</label>
         <select onChange={onStateselect} className='border p-2 rounded-s-sx' id="state" name='state'>
           <option value='all'>All</option>
           <option value="AL">Alabama</option>
@@ -245,7 +246,8 @@ function MyForm({loading, getSummary}) {
           <option value="WI">Wisconsin</option>
           <option value="WY">Wyoming</option>
         </select>
-        <fieldset>
+        </div>
+        <fieldset className='p-2'>
         <legend className={selyears}>Select Review Ratings</legend>
         <div className='flex justify-between'>
           <div>
@@ -290,8 +292,7 @@ function MyForm({loading, getSummary}) {
           
 
         </select>
-
-        <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>
+        <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-2' type='submit'>
           <div className='flex justify-center'>
             <div style={{display: loading}} className='animate-spin bg-sky-100 mr-2 rounded-full border-t-indigo-500 border-t-3 h-8 w-8'></div><div className='p-2'>Submit</div>
           </div>
@@ -308,11 +309,14 @@ function MyForm({loading, getSummary}) {
 
 function MySummary({summary}) {
   return (
-    <>
+    <div className='text-center'>
+      <p className='text-lg border-b-2'>
+        High level summary of review data
+      </p>
       <div className=''>
         {summary}
       </div>
-    </>
+    </div>
   )
 }
 
