@@ -258,12 +258,25 @@ function MyForm({loading, getSummary}) {
           </div>
         </div>
         </fieldset>
-        <label for='product'>Product/Service</label>
+        <label for='product'>Product/Service (optional)</label>
         <select onChange={productSelect} className='border p-2 rounded-s-sx' id="product" name='product'>
           <option value="">Choose a Product/Service</option>
+          <option disabled>------------------</option>
+          <option value="mobile order">Mobile Order System</option>
+          <option value="drive thru">The Drive Through</option>
+          <option value="in store">In Store Experience</option>
+          <option disabled>------------------</option>
           <option value="white chocolate mocha">White Chocolate Mocha</option>
           <option value="pumpkin spice latte">Pumpkin Spice Latte</option>
-          <option value="drive thru">The Drive Through</option>
+          <option value="green tea latte">Green Tea Latte</option>
+          <option value="vanilla sweet cream cold brew">Vanilla Sweet Cream Cold Brew</option>
+          <option value="nitro cold brew">Nitro Cold Brew</option>
+          <option value="caramel macchiato">Caramel Macchiato</option>
+          <option value="cinnamon dolce latte">Cinnamon Dolce Latte</option>
+          <option value="chai tea latte">Chai Tea Latte</option>
+          <option value="espresso">Espresso</option>
+          
+
         </select>
 
         <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-1' type='submit'>

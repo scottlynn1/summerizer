@@ -49,7 +49,7 @@ def hello(request, data: ParamsSchema):
   with connection.cursor() as cursor:
     if data.product:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT 50;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
@@ -60,7 +60,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
+          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s AND review LIKE %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
@@ -69,7 +69,7 @@ def hello(request, data: ParamsSchema):
           print(chartdata)
     else:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 50;", [ratings, data.years['start'], data.years['end']])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 150;", [ratings, data.years['start'], data.years['end']])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end']])
@@ -80,7 +80,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s LIMIT 50;", [ratings, data.years['start'], data.years['end'], data.state])
+          "BETWEEN %s AND %s AND address=%s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         cursor.execute("SELECT AVG(rating) AS avg, EXTRACT(YEAR FROM date::date) AS year FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND address=%s GROUP BY EXTRACT(YEAR from date::date) ORDER BY year;", [ratings, data.years['start'], data.years['end'], data.state])
@@ -93,15 +93,15 @@ def hello(request, data: ParamsSchema):
   summary_index = SummaryIndex(nodes)
 
   summary_query_engine = summary_index.as_query_engine(
-    response_mode="tree_summarize",
+    response_mode="simple_summarize",
     use_async=True,
   )
   print(data.product)
   if data.product:
-    summary = summary_query_engine.query(f"What are the overall issues of the {data.product} from these reviews about a coffee chain?")
+    summary = summary_query_engine.query(f"What are the overall issues or things people like of the {data.product} from these reviews about a coffee chain?")
     print('product summary' + str(summary))
   else:
-    summary = summary_query_engine.query("What is the overall perception of the coffee chain from these reviews are about?")
+    summary = summary_query_engine.query("What are the overall issues or things people like of the coffee chain from these reviews are about?")
     print('store summary' + str(summary))
 
   return JsonResponse({'db': str(summary), 'chartdata': chartdata})
