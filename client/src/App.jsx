@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Chart from 'chart.js/auto'
 import { Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import './App.css'
 
 const API_HOST = 'http://localhost:8000';
@@ -140,6 +141,15 @@ function MyForm({loading, getSummary}) {
 
   const productSelect = (e) => setProduct(e.target.value)
 
+  const states_abbr = {AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware',
+    FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', 
+    MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
+    NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', 
+    PA: 'Pennsylvania', RI:'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
+    WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'};
+
+  const yearslist = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
+
   return (
     <div className='max-w-[400px] m-auto'>
       <form onSubmit={handleSubmit} className='flex flex-col text-center'>
@@ -148,103 +158,30 @@ function MyForm({loading, getSummary}) {
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
           <label className='m-1' for='start'>Starting Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
-            <option value="2006">2006</option>
-            <option value="2007">2007</option>
-            <option value="2008">2008</option>
-            <option value="2009">2009</option>
-            <option value="2010">2010</option>
-            <option value="2011">2011</option>
-            <option value="2012">2012</option>
-            <option value="2013">2013</option>
-            <option value="2014">2014</option>
-            <option value="2015">2015</option>
-            <option value="2016">2016</option>
-            <option value="2017">2017</option>
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
+            {yearslist.map((year) => {
+              return (
+                <option value={year}>{year}</option>
+              )
+            })}
           </select>
           <label className='m-1' for='end'>Ending Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value='2024'>
-            <option value="2006">2006</option>
-            <option value="2007">2007</option>
-            <option value="2008">2008</option>
-            <option value="2009">2009</option>
-            <option value="2010">2010</option>
-            <option value="2011">2011</option>
-            <option value="2012">2012</option>
-            <option value="2013">2013</option>
-            <option value="2014">2014</option>
-            <option value="2015">2015</option>
-            <option value="2016">2016</option>
-            <option value="2017">2017</option>
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
+            {yearslist.map((year) => {
+              return (
+                <option value={year}>{year}</option>
+              )
+            })}
           </select>
         </div>
         <div className='p-2'>
         <label className='p-2' for='state'>State</label>
         <select onChange={onStateselect} className='border p-2 rounded-s-sx' id="state" name='state'>
           <option value='all'>All</option>
-          <option value="AL">Alabama</option>
-          <option value="AK">Alaska</option>
-          <option value="AZ">Arizona</option>
-          <option value="AR">Arkansas</option>
-          <option value="CA">California</option>
-          <option value="CO">Colorado</option>
-          <option value="CT">Connecticut</option>
-          <option value="DE">Delaware</option>
-          <option value="FL">Florida</option>
-          <option value="GA">Georgia</option>
-          <option value="HI">Hawaii</option>
-          <option value="ID">Idaho</option>
-          <option value="IL">Illinois</option>
-          <option value="IN">Indiana</option>
-          <option value="IA">Iowa</option>
-          <option value="KS">Kansas</option>
-          <option value="KY">Kentucky</option>
-          <option value="LA">Louisiana</option>
-          <option value="ME">Maine</option>
-          <option value="MD">Maryland</option>
-          <option value="MA">Massachusetts</option>
-          <option value="MI">Michigan</option>
-          <option value="MN">Minnesota</option>
-          <option value="MS">Mississippi</option>
-          <option value="MO">Missouri</option>
-          <option value="MT">Montana</option>
-          <option value="NE">Nebraska</option>
-          <option value="NV">Nevada</option>
-          <option value="NH">New Hampshire</option>
-          <option value="NJ">New Jersey</option>
-          <option value="NM">New Mexico</option>
-          <option value="NY">New York</option>
-          <option value="NC">North Carolina</option>
-          <option value="ND">North Dakota</option>
-          <option value="OH">Ohio</option>
-          <option value="OK">Oklahoma</option>
-          <option value="OR">Oregon</option>
-          <option value="PA">Pennsylvania</option>
-          <option value="RI">Rhode Island</option>
-          <option value="SC">South Carolina</option>
-          <option value="SD">South Dakota</option>
-          <option value="TN">Tennessee</option>
-          <option value="TX">Texas</option>
-          <option value="UT">Utah</option>
-          <option value="VT">Vermont</option>
-          <option value="VA">Virginia</option>
-          <option value="WA">Washington</option>
-          <option value="WV">West Virginia</option>
-          <option value="WI">Wisconsin</option>
-          <option value="WY">Wyoming</option>
+          {Object.keys(states_abbr).map((state) => {
+            return (
+              <option value={state}>{states_abbr[state]}</option>
+            )
+          })}
         </select>
         </div>
         <fieldset className='p-2'>
@@ -321,14 +258,6 @@ function MySummary({summary}) {
 }
 
 
-
-function MyReviews() {
-  return(
-    <>
-    </>
-  )
-}
-
 function MyChart({chartdata}) {
   const options = {
     responsive: true,
@@ -358,13 +287,14 @@ function MyChart({chartdata}) {
   };
   return(
     <div className='w-full min-[1240px]:max-w-1/2 min-h-[0px] h-auto aspect-16/9'>
-      <Bar options={options} data={data} />
+      <Line options={options} data={data} />
     </div>
   )
 }
 
 function MyChart1({chartdata1}) {
   const options = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -373,7 +303,7 @@ function MyChart1({chartdata1}) {
       },
     },
     scales: {
-      y: {
+      x: {
         type: 'linear', 
         min: 0,       
       },
