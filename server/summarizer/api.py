@@ -47,10 +47,11 @@ def hello(request, data: ParamsSchema):
   chartdata = {}
   chartdata1 = {}
   nodes = []
+  LIMIT = 500
   with connection.cursor() as cursor:
     if data.product:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%'])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%', LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -65,7 +66,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%'])
+          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%', LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -74,7 +75,7 @@ def hello(request, data: ParamsSchema):
             chartdata[str(average[1])] = float(average[0])
     else:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT 150;", [ratings, data.years['start'], data.years['end']])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -89,7 +90,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s LIMIT 150;", [ratings, data.years['start'], data.years['end'], data.state])
+          "BETWEEN %s AND %s AND address=%s LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -106,10 +107,10 @@ def hello(request, data: ParamsSchema):
   )
   print(data.product)
   if data.product:
-    summary = summary_query_engine.query(f"What are the overall issues or things people like of the {data.product} from these reviews about a coffee chain?")
+    summary = summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews about specifically the {data.product} from a coffee chain?")
     print('product summary' + str(summary))
   else:
-    summary = summary_query_engine.query("What are the overall issues or things people like of the coffee chain from these reviews are about?")
+    summary = summary_query_engine.query("In 150 words or less, summarize these cocatenated reviews about a coffee chain?")
     print('store summary' + str(summary))
 
   return JsonResponse({'db': str(summary), 'chartdata': chartdata, 'chartdata1': chartdata1})

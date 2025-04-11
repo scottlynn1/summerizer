@@ -21,8 +21,8 @@ async function getCsrfToken() {
 function ContainerComp() {
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState('none');
-  const [chartdata, setChartdata] = useState({});
-  const [chartdata1, setChartdata1] = useState({});
+  const [linechartdata, setLinechartdata] = useState({});
+  const [barchartdata, setBarchartdata] = useState({});
 
   const getSummary = async (object) => {
     setLoading('block')
@@ -35,8 +35,8 @@ function ContainerComp() {
           setLoading('none');
           console.log(data);
           setSummary(data['db']);
-          setChartdata1(data['chartdata1']);
-          setChartdata(data['chartdata']);
+          setBarchartdata(data['chartdata1']);
+          setLinechartdata(data['chartdata']);
         })
         .catch((err) => {
           setLoading('none');
@@ -48,21 +48,32 @@ function ContainerComp() {
 
   return (
     <>
-      <div className='flex flex-col bg-sky-50'>
-        <div className='text-center text-3xl p-2 bg-blue-100'>User interface to query review database to obtain high level overview and product level details</div>
-        <div className='flex min-[1240px]:flex-row flex-col items-center justify-center'>
-          <div className='min-w-[400px] max-w-[400px] min-[1240px]:ml-auto border rounded-md p-2'>
-            <MyForm loading={loading} getSummary={getSummary}/>
+        <div className='text-center text-3xl p-2 bg-blue-100'>
+          This is a user interface integrating an LLM to analyse a customer review dataset.
+          <p className='text-lg p-2'>
+            You can select a date range, several levels of review ratings, narrow down to a specific state, and optional to a specific product or service.
+            <br></br>
+            The system will then generate a summary of the filtered data and and display additional data such as average rating across time and average rating by state if applicable.
+          </p>
+        </div>
+        <div className='flex flex-col min-[1200px]:flex-row justify-between items-start m-auto p-2'>
+          <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
+            <div className='flex flex-col min-[850px]:flex-row items-center min-[850px]:items-start justify-around'>
+              <div className='min-w-[400px] max-w-[450px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
+                <MyForm loading={loading} getSummary={getSummary}/>
+              </div>
+              <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[850px]:mt-0 rounded-md bg-sky-50'>
+                <MySummary summary={summary}/>
+              </div>
+            </div>
+            <div className='flex w-full min-h-[0px] min-w-[0px] h-auto aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
+                <LineChart linechartdata={linechartdata}/>
+            </div>
           </div>
-          <div className='w-full max-w-[750px] min-h-[380px] border mx-auto my-2 rounded-md'>
-            <MySummary summary={summary}/>
+          <div className='flex flex-1 w-full max-w-[450px] min-h-[0px] min-w-[300px] aspect-9/18 border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50'>
+            <BarChart barchartdata={barchartdata}/>
           </div>
         </div>
-        <div className='flex min-[1240px]:flex-row flex-col'>
-            <MyChart chartdata={chartdata}/>
-            <MyChart1 chartdata1={chartdata1}/>
-        </div>
-      </div>
     </>
   )
 }
@@ -154,7 +165,7 @@ function MyForm({loading, getSummary}) {
     <div className='max-w-[400px] m-auto'>
       <form onSubmit={handleSubmit} className='flex flex-col text-center'>
         <div className='p-2'>
-          <p>Date Range</p>
+          <p className='font-semibold mb-2'>Date Range</p>
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
           <label className='m-1' for='start'>Starting Year</label>
           <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
@@ -173,7 +184,7 @@ function MyForm({loading, getSummary}) {
             })}
           </select>
         </div>
-        <div className='p-2'>
+        <div className='font-semibold p-2'>
         <label className='p-2' for='state'>State</label>
         <select onChange={onStateselect} className='border p-2 rounded-s-sx' id="state" name='state'>
           <option value='all'>All</option>
@@ -185,7 +196,9 @@ function MyForm({loading, getSummary}) {
         </select>
         </div>
         <fieldset className='p-2'>
+        <div className='font-semibold'>
         <legend className={selyears}>Select Review Ratings</legend>
+        </div>
         <div className='flex justify-between'>
           <div>
             <input className='m-1' onChange={onCheckbox} type="checkbox" id='rating1' name="ratings" value="1" />
@@ -209,7 +222,9 @@ function MyForm({loading, getSummary}) {
           </div>
         </div>
         </fieldset>
+        <div className='font-semibold'>
         <label for='product'>Product/Service (optional)</label>
+        </div>
         <select onChange={productSelect} className='border p-2 rounded-s-sx' id="product" name='product'>
           <option value="">Choose a Product/Service</option>
           <option disabled>------------------</option>
@@ -258,10 +273,11 @@ function MySummary({summary}) {
 }
 
 
-function MyChart({chartdata}) {
+function LineChart({linechartdata}) {
   const options = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
+    aspectRatio: 2,
     plugins: {
       legend: {
         position: 'top',
@@ -276,27 +292,28 @@ function MyChart({chartdata}) {
     },
   };
   const data = {
-    labels: Object.keys(chartdata),
+    labels: Object.keys(linechartdata),
     datasets: [
       {
         label: 'Average Ratings by Year',
-        data: Object.values(chartdata),
+        data: Object.values(linechartdata),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
   };
   return(
-    <div className='w-full min-[1240px]:max-w-1/2 min-h-[0px] h-auto aspect-16/9'>
+    <div className='flex-1 w-full h-full'>
       <Line options={options} data={data} />
     </div>
   )
 }
 
-function MyChart1({chartdata1}) {
+function BarChart({barchartdata}) {
   const options = {
     indexAxis: 'y',
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
+    aspectRatio: .5,
     plugins: {
       legend: {
         position: 'top',
@@ -310,17 +327,17 @@ function MyChart1({chartdata1}) {
     },
   };
   const data = {
-    labels: Object.keys(chartdata1),
+    labels: Object.keys(barchartdata),
     datasets: [
       {
         label: 'Average Ratings by State',
-        data: Object.values(chartdata1),
+        data: Object.values(barchartdata),
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
   };
   return(
-    <div className='w-full min-[1240px]:max-w-1/2 min-h-[0px] h-auto aspect-16/9'>
+    <div className='flex-1 w-full h-full'>
       <Bar options={options} data={data} />
     </div>
   )
