@@ -53,27 +53,30 @@ function ContainerComp() {
           <p className='text-lg p-2'>
             You can select a date range, several levels of review ratings, narrow down to a specific state, and optional to a specific product or service.
             <br></br>
-            The system will then generate a summary of the filtered data and and display additional data such as average rating across time and average rating by state if applicable.
+            The system will then generate a summary of the filtered data and display additional data such as average rating across time and average rating by state if applicable.
           </p>
         </div>
         <div className='flex flex-col min-[1200px]:flex-row justify-between items-start m-auto p-2'>
           <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
             <div className='flex flex-col min-[850px]:flex-row items-center min-[850px]:items-start justify-around'>
-              <div className='min-w-[400px] max-w-[450px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
+              <div className='min-w-[400px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
                 <MyForm loading={loading} getSummary={getSummary}/>
               </div>
               <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[850px]:mt-0 rounded-md bg-sky-50'>
                 <MySummary summary={summary}/>
               </div>
             </div>
-            <div className='flex w-full min-h-[0px] min-w-[0px] h-auto aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
+            <div className='flex w-full min-h-[0px] min-w-[0px] aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
                 <LineChart linechartdata={linechartdata}/>
             </div>
           </div>
-          <div className='flex flex-1 w-full max-w-[450px] min-h-[0px] min-w-[300px] aspect-9/18 border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50'>
+          <div className='flex flex-1 w-full max-w-[450px] min-h-[0px] min-w-[300px] aspect-9/18 border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50 items-stretch'>
             <BarChart barchartdata={barchartdata}/>
           </div>
         </div>
+        <footer class="bg-blue-100 p-2 text-center py-6 mt-6">
+          <p class="">© 2025 Scott Lynn. All rights reserved.</p>
+        </footer>
     </>
   )
 }
@@ -162,7 +165,6 @@ function MyForm({loading, getSummary}) {
   const yearslist = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
 
   return (
-    <div className='max-w-[400px] m-auto'>
       <form onSubmit={handleSubmit} className='flex flex-col text-center'>
         <div className='p-2'>
           <p className='font-semibold mb-2'>Date Range</p>
@@ -250,7 +252,6 @@ function MyForm({loading, getSummary}) {
           </div>
         </button>
       </form>
-    </div>
   );
 }
 
@@ -276,8 +277,8 @@ function MySummary({summary}) {
 function LineChart({linechartdata}) {
   const options = {
     responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 2,
+    maintainAspectRatio: false,
+    // aspectRatio: 2,
     plugins: {
       legend: {
         position: 'top',
@@ -312,8 +313,8 @@ function BarChart({barchartdata}) {
   const options = {
     indexAxis: 'y',
     responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: .5,
+    maintainAspectRatio: false,
+    // aspectRatio: .5,
     plugins: {
       legend: {
         position: 'top',
