@@ -1,4 +1,5 @@
 .env
+.envv
 Dockerfile
 __pycache__/
 *.pyc

@@ -1,6 +1,5 @@
 from ninja import NinjaAPI, Schema
 from django.http import JsonResponse
-# from .models import Reviews
 from django.db import connection
 
 import os
