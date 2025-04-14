@@ -1,6 +1,6 @@
 from ninja import NinjaAPI, Schema
 from django.http import JsonResponse
-from .models import Reviews
+# from .models import Reviews
 from django.db import connection
 
 import os
@@ -107,10 +107,10 @@ def hello(request, data: ParamsSchema):
   )
   print(data.product)
   if data.product:
-    summary = summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews about specifically the {data.product} from a coffee chain?")
+    summary = summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews from several starbucks locations about specifically the {data.product}?")
     print('product summary' + str(summary))
   else:
-    summary = summary_query_engine.query("In 150 words or less, summarize these cocatenated reviews about a coffee chain?")
+    summary = summary_query_engine.query("In 150 words or less, summarize these cocatenated reviews from several starbucks locations")
     print('store summary' + str(summary))
 
   return JsonResponse({'db': str(summary), 'chartdata': chartdata, 'chartdata1': chartdata1})

@@ -26,11 +26,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get('DEBUG')))
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+else:
+    ALLOWED_HOSTS = ["project1.scottlynn.live", "www.project1.scottlynn.live"]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+else:
+    CORS_ALLOWED_ORIGINS = ["https://project1.scottlynn.live"]
+    CSRF_TRUSTED_ORIGINS = ["https://project1.scottlynn.live"]
+
 
 # Application definition
 
@@ -58,7 +68,6 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173"]
 
 CORS_ALLOW_METHODS = [
 'DELETE',
@@ -105,17 +114,20 @@ WSGI_APPLICATION = 'summarizer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+DEFAULT_DB = 'sqlite:///db.sqlite3'
+
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'starbucksproject',
-        'USER': 'scott',
-        'PASSWORD': os.environ.get('pg_password'),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'USER': 'avnadmin',
+        'PASSWORD': os.environ.get('aiven_password'),
+        'HOST': os.environ.get('aiven_host'),
+        'PORT': '11273',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -4,12 +4,14 @@ import { Bar } from 'react-chartjs-2';
 import { Line } from 'react-chartjs-2';
 import './App.css'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const API_HOST = 'http://localhost:8000';
 let _csrfToken = null;
 
 async function getCsrfToken() {
   if (_csrfToken === null) {
-    const response = await fetch('http://127.0.0.1:8000/csrf/', {
+    const response = await fetch(`${API_BASE}/csrf/`, {
       credentials: 'include',
     });
     const data = await response.json();
@@ -26,7 +28,7 @@ function ContainerComp() {
 
   const getSummary = async (object) => {
     setLoading('block')
-    fetch('http://127.0.0.1:8000/api/', {
+    fetch(`${API_BASE}/api/`, {
       method: 'POST',
       body: JSON.stringify(object),
       headers: {'X-CSRFToken': await getCsrfToken(), 'Content-type': 'application/json; charset=UTF-8'},
