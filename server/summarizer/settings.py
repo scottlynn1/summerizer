@@ -29,14 +29,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = bool(int(os.environ.get('DEBUG')))
 
 if DEBUG:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = ["project1.scottlynn.live", "www.project1.scottlynn.live"]
 
 
 if DEBUG:
     CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173"]
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:5173"]
 else:
     CORS_ALLOWED_ORIGINS = ["https://project1.scottlynn.live"]
     CSRF_TRUSTED_ORIGINS = ["https://project1.scottlynn.live"]

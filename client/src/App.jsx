@@ -5,8 +5,6 @@ import { Line } from 'react-chartjs-2';
 import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-
-const API_HOST = 'http://localhost:8000';
 let _csrfToken = null;
 
 async function getCsrfToken() {
@@ -50,35 +48,37 @@ function ContainerComp() {
 
   return (
     <>
-        <div className='text-center text-3xl p-2 bg-blue-100'>
-          This is a user interface integrating an LLM to analyse a customer review dataset.
-          <p className='text-lg p-2'>
-            You can select a date range, several levels of review ratings, narrow down to a specific state, and optional to a specific product or service.
-            <br></br>
-            The system will then generate a summary of the filtered data and display additional data such as average rating across time and average rating by state if applicable.
-          </p>
-        </div>
-        <div className='flex flex-col min-[1200px]:flex-row justify-between items-start m-auto p-2'>
-          <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
-            <div className='flex flex-col min-[850px]:flex-row items-center min-[850px]:items-start justify-around'>
-              <div className='min-w-[400px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
-                <MyForm loading={loading} getSummary={getSummary}/>
-              </div>
-              <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[850px]:mt-0 rounded-md bg-sky-50'>
-                <MySummary summary={summary}/>
-              </div>
+      <div className='text-center text-3xl p-2 bg-blue-100'>
+        This is a user interface integrating an LLM to analyse a customer review dataset.
+        <p className='text-lg p-2'>
+          You can select a date range, several levels of review ratings, narrow down to a specific state, and optional to a specific product or service.
+          <br></br>
+          The system will then generate a summary of the filtered data and display additional data such as average rating across time and average rating by state if applicable.
+        </p>
+      </div>
+      
+      <div className='flex flex-col min-[1200px]:flex-row justify-between m-auto p-2'>
+        <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
+          <div className='flex flex-col min-[850px]:flex-row items-center min-[850px]:items-start justify-around'>
+            <div className='min-w-[400px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
+              <MyForm loading={loading} getSummary={getSummary}/>
             </div>
-            <div className='flex w-full min-h-[0px] min-w-[0px] aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
-                <LineChart linechartdata={linechartdata}/>
+            <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[850px]:mt-0 rounded-md bg-sky-50'>
+              <MySummary summary={summary}/>
             </div>
           </div>
-          <div className='flex flex-1 w-full max-w-[450px] min-h-[0px] min-w-[300px] aspect-9/18 border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50 items-stretch'>
-            <BarChart barchartdata={barchartdata}/>
+          <div className='flex w-full min-h-[0px] min-w-[0px] aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
+              <LineChart linechartdata={linechartdata}/>
           </div>
         </div>
-        <footer class="bg-blue-100 p-2 text-center py-6 mt-6">
-          <p class="">© 2025 Scott Lynn. All rights reserved.</p>
-        </footer>
+        <div className='flex flex-1 h-auto w-full max-w-[450px] min-h-[800px] min-w-[300px] border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50 self-stretch'>
+          <BarChart barchartdata={barchartdata}/>
+        </div>
+      </div>
+
+      <footer class="bg-blue-100 p-2 text-center py-6 mt-6">
+        <p class="">© 2025 Scott Lynn. All rights reserved.</p>
+      </footer>
     </>
   )
 }

@@ -46,11 +46,11 @@ def hello(request, data: ParamsSchema):
   chartdata = {}
   chartdata1 = {}
   nodes = []
-  LIMIT = 500
+  LIMIT = 2000
   with connection.cursor() as cursor:
     if data.product:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%', LIMIT])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE ORDER BY RANDOM() %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%', LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -65,7 +65,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s AND review LIKE %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%', LIMIT])
+          "BETWEEN %s AND %s AND address=%s AND review LIKE %s ORDER BY RONDOM() LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, '%'+data.product+'%', LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -74,7 +74,7 @@ def hello(request, data: ParamsSchema):
             chartdata[str(average[1])] = float(average[0])
     else:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], LIMIT])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s ORDER BY RANDOM() LIMIT %s;", [ratings, data.years['start'], data.years['end'], LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -89,7 +89,7 @@ def hello(request, data: ParamsSchema):
         cursor.execute(
           "SELECT review, address, date, rating FROM reviews "
           "WHERE rating=ANY(%s) AND date "
-          "BETWEEN %s AND %s AND address=%s LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, LIMIT])
+          "BETWEEN %s AND %s AND address=%s ORDER BY RANDOM() LIMIT %s;", [ratings, data.years['start'], data.years['end'], data.state, LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
