@@ -57,13 +57,13 @@ function ContainerComp() {
         </p>
       </div>
       
-      <div className='flex flex-col min-[1200px]:flex-row justify-between m-auto p-2'>
+      <div className='flex flex-col min-[1360px]:flex-row justify-stretch items-stretch min-[850px]:mx-[80px] p-2'>
         <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
-          <div className='flex flex-col min-[850px]:flex-row items-center min-[850px]:items-start justify-around'>
+          <div className='flex flex-col min-[930px]:flex-row items-center min-[930px]:items-start justify-around'>
             <div className='min-w-[400px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
               <MyForm loading={loading} getSummary={getSummary}/>
             </div>
-            <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[850px]:mt-0 rounded-md bg-sky-50'>
+            <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[930px]:mt-0 rounded-md bg-sky-50'>
               <MySummary summary={summary}/>
             </div>
           </div>
@@ -71,7 +71,7 @@ function ContainerComp() {
               <LineChart linechartdata={linechartdata}/>
           </div>
         </div>
-        <div className='flex flex-1 h-auto w-full max-w-[450px] min-h-[800px] min-w-[300px] border mx-auto mt-2 min-[1200px]:mt-0 min-[1200px]:ml-2 p-4 rounded-md bg-sky-50 self-stretch'>
+        <div className='flex flex-1 w-full max-w-[400px] min-h-[0px] min-w-[250px] aspect-9/18 border mx-auto mt-2 min-[1360px]:mt-0 min-[1360px]:ml-2 p-4 rounded-md bg-sky-50 items-stretch'>
           <BarChart barchartdata={barchartdata}/>
         </div>
       </div>
