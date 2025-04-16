@@ -1,1 +1,1 @@
-<img src="image.png" alt="sample" width='100%' heigth='auto'>
+<img src="images/image.png" alt="sample" width='100%' heigth='auto'>
