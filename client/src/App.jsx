@@ -33,7 +33,6 @@ function ContainerComp() {
       credentials: 'include'
    }).then((response) => response.json()).then((data) => {
           setLoading('none');
-          console.log(data);
           setSummary(data['db']);
           setBarchartdata(data['chartdata1']);
           setLinechartdata(data['chartdata']);
@@ -133,24 +132,19 @@ function MyForm({loading, getSummary}) {
     if (e.target.id == 'start') {
       setYears({...years, 'start': e.target.value})
       if (Number(years.end) < Number(e.target.value)) {
-        console.log('show')
         setYearserror('block')
       } else {
-        console.log('hide')
         setYearserror('none')
       }
     }
     if (e.target.id == 'end') {
       setYears({...years, 'end': e.target.value})
       if (Number(e.target.value) < Number(years.start)) {
-        console.log('show')
         setYearserror('block')
       } else {
-        console.log('hide')
         setYearserror('none')
       }
     }
-    console.log(years)
   };
 
   const onStateselect = (e) => setState(e.target.value)
@@ -180,7 +174,7 @@ function MyForm({loading, getSummary}) {
             })}
           </select>
           <label className='m-1' for='end'>Ending Year</label>
-          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value='2024'>
+          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value={years.end}>
             {yearslist.map((year) => {
               return (
                 <option value={year}>{year}</option>

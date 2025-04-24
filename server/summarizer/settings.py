@@ -125,7 +125,7 @@ DATABASES = {
         'USER': 'avnadmin',
         'PASSWORD': os.environ.get('aiven_password'),
         'HOST': os.environ.get('aiven_host'),
-        'PORT': '11273',
+        'PORT': os.environ.get('db_port'),
     }
 }
 
