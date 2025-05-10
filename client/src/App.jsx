@@ -32,6 +32,7 @@ function ContainerComp() {
       headers: {'X-CSRFToken': await getCsrfToken(), 'Content-type': 'application/json; charset=UTF-8'},
       credentials: 'include'
    }).then((response) => response.json()).then((data) => {
+          console.log(data)
           setLoading('none');
           setSummary(data['db']);
           setBarchartdata(data['chartdata1']);
@@ -47,35 +48,79 @@ function ContainerComp() {
 
   return (
     <>
-      <div className='text-center text-3xl p-2 bg-blue-100'>
-        This is a user interface integrating an LLM to analyse a customer review dataset.
-        <p className='text-lg p-2'>
-          You can select a date range, several levels of review ratings, narrow down to a specific state, and optional to a specific product or service.
-          <br></br>
-          The system will then generate a summary of the filtered data and display additional data such as average rating across time and average rating by state if applicable.
-        </p>
-      </div>
+      <header className='header text-center text-3xl p-2 bg-blue-100 rounded-2xl my-4'>
+        User interface to query the starbucks reviews dataset
+      </header>
       
-      <div className='flex flex-col min-[1360px]:flex-row justify-stretch items-stretch min-[850px]:mx-[80px] p-2'>
-        <div className='flex flex-2 flex-col w-full min-w-[0px] mx-auto'>
-          <div className='flex flex-col min-[930px]:flex-row items-center min-[930px]:items-start justify-around'>
-            <div className='min-w-[400px] border rounded-md-2 mx-2 p-2 bg-sky-50'>
+      <div className='flex flex-col min-[1570px]:flex-row min-[995px]:mx-[80px] items-center'>
+        <div className='flex-2 flex flex-col'>
+          <div className='flex flex-col min-[995px]:flex-row items-center'>
+            <div className='box min-w-[400px] m-4 p-2'>
               <MyForm loading={loading} getSummary={getSummary}/>
             </div>
-            <div className='w-full max-w-[750px] min-w-[300px] min-h-[350px] border mt-2 min-[930px]:mt-0 rounded-md bg-sky-50'>
+            <div className='box w-full max-w-[650px] min-h-[410px] min-[995px]:min-w-[550px] m-4'>
+              <h2 className='border-b-2'>Summary</h2>
               <MySummary summary={summary}/>
             </div>
           </div>
-          <div className='flex w-full min-h-[0px] min-w-[0px] aspect-16/9 border m-auto mt-2 p-2 rounded-md bg-sky-50'>
-              <LineChart linechartdata={linechartdata}/>
+          <div className='box m-4 max-w-[1085px]'>
+            <h2 className='border-b-2'>Average Rating by Year</h2>
+            <div className='flex min-w-0 min-h-0 flex-col min-[880px]:flex-row min-[880px]:min-w-128'>
+              <div className='chart flex-2 w-full min-h-0 min-w-0 max-h-75 m-auto mt-2 p-2 aspect-9/16'>
+                    <div className='w-full h-full'>
+                      <LineChart linechartdata={linechartdata}/>
+                    </div>
+              </div>
+              <div className='flex-1 px-2 mt-4'>
+                <div className='p-2 my-2 text-2xl'>
+                  <p>Best Year: <span>{summary.length > 0 ? Math.max(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>
+                </div>
+                <div className='p-2 my-2 text-2xl border-t-1'>
+                  <p>Worst Year: <span>{summary.length > 0 ? Math.min(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>                  
+                </div>
+                <div className='p-2 my-2 text-2xl border-t-1'>
+                  <p>Greatest Increase: </p>
+                  <p></p>
+                </div>
+                <div className='p-2 my-2 text-2xl border-t-1'>
+                  <p>Greatest Decrease: <span></span></p>
+                  <p></p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className='flex flex-1 w-full max-w-[400px] min-h-[0px] min-w-[250px] aspect-9/18 border mx-auto mt-2 min-[1360px]:mt-0 min-[1360px]:ml-2 p-4 rounded-md bg-sky-50 items-stretch'>
-          <BarChart barchartdata={barchartdata}/>
+        <div className='flex-1'>
+          <div className='box m-4 max-w-[1050px]'>
+            <h2 className='border-b-2'>Average Rating by State</h2>
+            <div className='flex flex-col min-[650px]:flex-row mt-4 max-w-126 h-184'>
+              <div className='chart flex-2 overflow-y-auto my-2 w-[350px] min-w-[200px] p-4 items-stretch'>
+                <div className='aspect-4/18 w-'>
+                  <BarChart barchartdata={barchartdata}/>
+                </div>
+              </div>
+              <div className='flex-1 '>
+                <div>
+                  <p className='p-2 my-2 text-2xl border-t-1'>Top 3 States: <span></span></p>
+                  <p className='p-2 my-2 text-2xl border-t-1'>
+                    {Object.keys(barchartdata).slice(0,3).map((state, index) => (
+                      <p>{`${index + 1}. ${state}`}</p>
+                    ))}
+                  </p>
+                  <p className='p-2 my-2 text-2xl border-t-1'>Bottom 3 States: <span></span></p>
+                  <p className='p-2 my-2 text-2xl border-t-1'>
+                    {Object.keys(barchartdata).slice(-3).map((state, index) => (
+                      <p>{`${index + 1}. ${state}`}</p>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <footer class="bg-blue-100 p-2 text-center py-6 mt-6">
+      <footer class="footer bg-blue-100 p-2 text-center py-6 mt-6">
         <p class="">© 2025 Scott Lynn. All rights reserved.</p>
       </footer>
     </>
@@ -165,22 +210,28 @@ function MyForm({loading, getSummary}) {
         <div className='p-2'>
           <p className='font-semibold mb-2'>Date Range</p>
           <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
-          <label className='m-1' for='start'>Starting Year</label>
-          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
-            {yearslist.map((year) => {
-              return (
-                <option value={year}>{year}</option>
-              )
-            })}
-          </select>
-          <label className='m-1' for='end'>Ending Year</label>
-          <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value={years.end}>
-            {yearslist.map((year) => {
-              return (
-                <option value={year}>{year}</option>
-              )
-            })}
-          </select>
+          <div>
+            <div className='m-2'>
+              <label className='m-1' for='start'>Starting Year</label>
+              <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="start" name='start'>
+                {yearslist.map((year) => {
+                  return (
+                    <option value={year}>{year}</option>
+                  )
+                })}
+              </select>
+            </div>
+            <div className='m-2'>
+              <label className='m-1' for='end'>Ending Year</label>
+              <select onChange={onDateselect} className='border p-2 rounded-s-sx' id="end" name='end' value={years.end}>
+                {yearslist.map((year) => {
+                  return (
+                    <option value={year}>{year}</option>
+                  )
+                })}
+              </select>
+            </div>
+          </div>
         </div>
         <div className='font-semibold p-2'>
         <label className='p-2' for='state'>State</label>
@@ -258,14 +309,9 @@ function MyForm({loading, getSummary}) {
 
 function MySummary({summary}) {
   return (
-    <div className='text-center'>
-      <p className='text-lg border-b-2'>
-        High level summary of review data
-      </p>
-      <div className=''>
+      <div className='p-2 m-2 font-display font-medium text-lg'>
         {summary}
       </div>
-    </div>
   )
 }
 
@@ -277,14 +323,13 @@ function LineChart({linechartdata}) {
     // aspectRatio: 2,
     plugins: {
       legend: {
-        position: 'top',
+        // position: 'top',
+        display: false,
       },
     },
     scales: {
       y: {
-        type: 'linear', // For numeric data (use 'time' for date values)
-        min: 0,       // Minimum x-axis value
-        max: 5,       // Maximum x-axis value
+        type: 'linear',
       },
     },
   };
@@ -299,9 +344,7 @@ function LineChart({linechartdata}) {
     ],
   };
   return(
-    <div className='flex-1 w-full h-full'>
       <Line options={options} data={data} />
-    </div>
   )
 }
 
@@ -310,16 +353,15 @@ function BarChart({barchartdata}) {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    // aspectRatio: .5,
     plugins: {
       legend: {
         position: 'top',
+        display: false
       },
     },
     scales: {
       x: {
-        type: 'linear', 
-        min: 0,       
+        type: 'linear',
       },
     },
   };
@@ -334,9 +376,7 @@ function BarChart({barchartdata}) {
     ],
   };
   return(
-    <div className='flex-1 w-full h-full'>
       <Bar options={options} data={data} />
-    </div>
   )
 }
 
