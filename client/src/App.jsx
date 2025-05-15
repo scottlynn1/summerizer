@@ -3,6 +3,7 @@ import Chart from 'chart.js/auto'
 import { Bar } from 'react-chartjs-2';
 import { Line } from 'react-chartjs-2';
 import './App.css'
+// import { sign } from 'chart.js/helpers';
 const states_abbr = {AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware',
   FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', 
   MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
@@ -10,18 +11,25 @@ const states_abbr = {AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas',
   PA: 'Pennsylvania', RI:'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
   WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'};
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-let _csrfToken = null;
+// let _csrfToken = null;
 
-async function getCsrfToken() {
-  if (_csrfToken === null) {
-    const response = await fetch(`${API_BASE}/csrf/`, {
-      credentials: 'include',
-    });
-    const data = await response.json();
-    _csrfToken = data.csrfToken;
-  }
-  return _csrfToken
-}
+
+// function getCsrfToken() {
+//   const csrfToken = document.cookie.split('; ')
+//     .find(row => row.startsWith('csrf_token='))
+//     ?.split('=')[1];
+//   return csrfToken;
+// }
+// async function getCsrfToken() {
+//   if (_csrfToken === null) {
+//     const response = await fetch(`${API_BASE}/csrf/`, {
+//       // credentials: 'include',
+//     });
+//     const data = await response.json();
+//     _csrfToken = data.csrfToken;
+//   }
+//   return _csrfToken
+// }
 
 function ContainerComp() {
   const [summary, setSummary] = useState('');
@@ -35,48 +43,75 @@ function ContainerComp() {
   const [ito, setIto] = useState('--')
   const [dfrom, setDfrom] = useState('--')
   const [dto, setDto] = useState('--')
-  
+  const abortControllerRef = useRef(null);
   let latestrequestid = useRef(0);
 
-  const getSummary = async (object) => {
-    setLoading('block')
-    setSummary('')
-    setIsloading(true)
-    const requestid = ++latestrequestid.current;
-    const response = await fetch(`${API_BASE}/stream/`, {
-      method: 'POST',
-      body: JSON.stringify(object),
-      headers: {'X-CSRFToken': await getCsrfToken(), 'Content-type': 'application/json; charset=UTF-8'},
-      credentials: 'include'
-    })
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-  
-    const { value: value1 } = await reader.read();
-  if (value1) {
-    const data = decoder.decode(value1);
-    const obj = JSON.parse(data);
-    setBarchartdata(obj['chartdata1'])
-    setLinechartdata(obj['chartdata'])
-    const { increasingindices, maxIncrease } = getlargestIncrease(Object.values(obj['chartdata']))
-    setIfrom(Object.keys(obj['chartdata'])[increasingindices[0]])
-    setIto(Object.keys(obj['chartdata'])[increasingindices[1]])
-    setLargestIncrease(maxIncrease)
-    const { decreasingindices, maxDecrease } = getlargestDecrease(Object.values(obj['chartdata']))
-    setDfrom(Object.keys(obj['chartdata'])[decreasingindices[0]])
-    setDto(Object.keys(obj['chartdata'])[decreasingindices[1]])
-    setLargestDecrease(maxDecrease)
-    
-  }
 
-  const { value: value2 } = await reader.read();
-  if (value2 && latestrequestid.current === requestid) {
-    const data = decoder.decode(value2);
-    const obj = JSON.parse(data);
-    setSummary(obj['db'])
-    setLoading('none')
-    setIsloading(false)
-  }
+
+
+
+  const getSummary = async (object) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    try {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setLoading('block')
+      setSummary('')
+      setIsloading(true)
+      const requestid = ++latestrequestid.current;
+      const response = await fetch(`${API_BASE}/api/`, {
+        method: 'POST',
+        body: JSON.stringify(object),
+        headers: {'Content-type': 'application/json; charset=UTF-8'},
+        credentials: 'include',
+        signal: controller.signal,
+      })
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+    
+      const { value: value1 } = await reader.read();
+      if (value1) {
+        const data = decoder.decode(value1);
+        const obj = JSON.parse(data);
+        setBarchartdata(obj['chartdata1'])
+        setLinechartdata(obj['chartdata'])
+        if (Object.keys(obj['chartdata']).length !== 0) {
+          const { increasingindices, maxIncrease } = getlargestIncrease(Object.values(obj['chartdata']))
+          setIfrom(Object.keys(obj['chartdata'])[increasingindices[0]])
+          setIto(Object.keys(obj['chartdata'])[increasingindices[1]])
+          setLargestIncrease(maxIncrease)
+          const { decreasingindices, maxDecrease } = getlargestDecrease(Object.values(obj['chartdata']))
+          setDfrom(Object.keys(obj['chartdata'])[decreasingindices[0]])
+          setDto(Object.keys(obj['chartdata'])[decreasingindices[1]])
+          setLargestDecrease(maxDecrease)
+        } else {
+          setIfrom('--')
+          setIto('--')
+          setDfrom('--')
+          setDto('--')
+          setLargestDecrease(0)
+          setLargestIncrease(0)
+        }
+        
+      }
+    
+      const { value: value2 } = await reader.read();
+      if (value2 && latestrequestid.current === requestid) {
+        const data = decoder.decode(value2);
+        const obj = JSON.parse(data);
+        setSummary(obj['db'])
+        setLoading('none')
+        setIsloading(false)
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        console.log('Request was aborted intentionally');
+      } else {
+        console.error('Fetch failed:', e);
+      }
+    }
   };
     
 
@@ -140,14 +175,14 @@ function ContainerComp() {
                 <div>
                   <p className='p-2 my-2 text-2xl text-data'>Top 3 States<span></span></p>
                   <div className='p-2 my-2 text-2xl border-t-1'>
-                    {Object.keys(barchartdata).slice(0,3).map((state) => (
-                      <p className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
+                    {Object.keys(barchartdata).slice(0,3).map((state, index) => (
+                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
                     ))}
                   </div>
                   <p className='p-2 my-2 text-2xl text-data'>Bottom 3 States<span></span></p>
                   <div className='p-2 my-2 text-2xl border-t-1'>
-                    {Object.keys(barchartdata).slice(-3).reverse().map((state) => (
-                      <p className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
+                    {Object.keys(barchartdata).slice(-3).reverse().map((state, index) => (
+                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
                     ))}
                   </div>
                 </div>
@@ -233,7 +268,7 @@ function MyForm({loading, getSummary}) {
   const productSelect = (e) => setProduct(e.target.value)
 
 
-  const yearslist = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
+  const yearslist = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
 
   return (
       <form onSubmit={handleSubmit} className='flex flex-col text-center'>
@@ -339,7 +374,7 @@ function MyForm({loading, getSummary}) {
 
 function MySummary({summary, isloading}) {
   return (
-      <div className='p-2 m-2 font-display font-medium text-lg data-numbers'>
+      <div className={summary ? 'p-2 m-2 font-display font-medium text-lg data-numbers fade-in' : 'p-2 m-2 font-display font-medium text-lg data-numbers'}>
         {isloading ? 
         <div className='loader'>
           <span></span>
@@ -434,7 +469,7 @@ function getlargestIncrease(arr) {
     const increase = arr[i + 1] - arr[i];
     if (increase > maxIncrease) {
       maxIncrease = increase;
-      index = i; // index of the first element in the pair
+      index = i;
     }
   }
 

@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path
 from .api import api
 from . import views
+from .views import StreamingView, csrf
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', api.urls),
     path('csrf/', views.csrf),
+    path('stream/', StreamingView.as_view()),
 ]

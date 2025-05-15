@@ -1,6 +1,8 @@
 from ninja import NinjaAPI, Schema
 from django.http import JsonResponse
 from django.db import connection
+from django.http import StreamingHttpResponse
+import json
 
 import os
 import nest_asyncio
@@ -34,8 +36,7 @@ llm = Groq(model="llama-3.1-8b-instant")
 Settings.llm = Groq(model="llama-3.1-8b-instant")
 Settings.embed_model = HuggingFaceEmbedding()
 
-@api.post("/")
-def hello(request, data: ParamsSchema):
+def generate_response(request, data: ParamsSchema):
   data.years['start'] = data.years['start'] + '-01-01'
   data.years['end'] = data.years['end'] + '-12-31'
 
@@ -50,7 +51,7 @@ def hello(request, data: ParamsSchema):
   with connection.cursor() as cursor:
     if data.product:
       if data.state == 'all':
-        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE ORDER BY RANDOM() %s LIMIT %s;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%', LIMIT])
+        cursor.execute("SELECT review, date, rating FROM reviews WHERE rating=ANY(%s) AND date BETWEEN %s AND %s AND review LIKE %s ORDER BY RANDOM() LIMIT %s;", [ratings, data.years['start'], data.years['end'], '%'+data.product+'%', LIMIT])
         for review in cursor:
           nodes.append(TextNode(text=review[0]))
         if len(ratings) > 1:
@@ -97,6 +98,7 @@ def hello(request, data: ParamsSchema):
           for average in cursor:
             chartdata[str(average[1])] = float(average[0])
 
+  yield json.dumps({'chartdata': chartdata, 'chartdata1': chartdata1}) + '\n'
     
   summary_index = SummaryIndex(nodes)
 
@@ -110,6 +112,10 @@ def hello(request, data: ParamsSchema):
     print('product summary' + str(summary))
   else:
     summary = summary_query_engine.query("In 150 words or less, summarize these cocatenated reviews from several starbucks locations")
-    print('store summary' + str(summary))
 
-  return JsonResponse({'db': str(summary), 'chartdata': chartdata, 'chartdata1': chartdata1})
+  yield json.dumps({'db': str(summary)}) + '\n'
+
+  # return JsonResponse({'db': str(summary), 'chartdata': chartdata, 'chartdata1': chartdata1})
+
+def hello(request):
+  return StreamingHttpResponse(generate_response(request), content_type='application/json')

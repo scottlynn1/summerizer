@@ -29,14 +29,25 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = bool(int(os.environ.get('DEBUG')))
 
 if DEBUG:
+  CSRF_COOKIE_HTTPONLY = False  # Required so JavaScript can read it
+  CSRF_COOKIE_SAMESITE = 'Lax'  # or 'None' if cross-site, but ensure HTTPS
+  CSRF_COOKIE_SECURE = False    # Set to True in production with HTTPS
+else:
+  CSRF_COOKIE_HTTPONLY = False  # Required so JavaScript can read it
+  CSRF_COOKIE_SAMESITE = 'Strict'  # or 'None' if cross-site, but ensure HTTPS
+  CSRF_COOKIE_SECURE = True    # Set to True in production with HTTPS
+
+if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = ["project1.scottlynn.live", "www.project1.scottlynn.live"]
 
 
 if DEBUG:
-    CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173"]
-    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:5173"]
+    CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
+    "http://127.0.0.1:5173",]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
+    "http://127.0.0.1:5173",]
 else:
     CORS_ALLOWED_ORIGINS = ["https://project1.scottlynn.live"]
     CSRF_TRUSTED_ORIGINS = ["https://project1.scottlynn.live"]
@@ -122,9 +133,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'starbucksproject',
-        'USER': 'avnadmin',
-        'PASSWORD': os.environ.get('aiven_password'),
-        'HOST': os.environ.get('aiven_host'),
+        'USER': os.environ.get('db_user'),
+        'PASSWORD': os.environ.get('db_password'),
+        'HOST': os.environ.get('db_host'),
         'PORT': os.environ.get('db_port'),
     }
 }

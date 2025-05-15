@@ -1,43 +1,77 @@
-from django.middleware.csrf import get_token
+from fastapi import FastAPI, Depends
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_csrf_protect import CsrfProtect
+from fastapi import HTTPException
+from fastapi import Response
+from fastapi import Request
+from pydantic import BaseModel
 
-from django.http import JsonResponse
-from django.db import connection
-from django.http import StreamingHttpResponse
+
 import json
 import os
-import nest_asyncio
+import asyncio
 from llama_index.core.schema import TextNode
 from llama_index.core import get_response_synthesizer
 from llama_index.core import SummaryIndex
 from llama_index.llms.groq import Groq
 from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from openai import RateLimitError
+
+
+import psycopg2
+
 from dotenv import load_dotenv
 load_dotenv()
+       
+csrf_protect = CsrfProtect()
 
-from django.views import View
-
-
-def csrf(request):
-    return JsonResponse({'csrfToken': get_token(request)})
-
-
-
-
-
-
+connection = psycopg2.connect(
+  dbname=os.environ.get('db_name'),
+  user = os.environ.get('db_user'),
+  password = os.environ.get('db_password'),
+  host = os.environ.get('db_host'),
+  port = int(os.environ.get('db_port')),
+)
 
 GROQ_API_KEY = os.environ.get('groq_key')
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 
-nest_asyncio.apply()
+# nest_asyncio.apply()
 
 llm = Groq(model="llama-3.1-8b-instant")
 
 Settings.llm = Groq(model="llama-3.1-8b-instant")
 Settings.embed_model = HuggingFaceEmbedding()
 
-def generate_response(request, data):
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.environ.get('cors_host_1'), os.environ.get('cors_host_2')],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
+
+# @app.middleware("http")
+# async def add_csrf_header(request, call_next):
+#     response = await call_next(request)
+#     if request.method in ["POST", "PUT", "DELETE"]:
+#       # Ensure CSRF protection
+#       csrf_token = csrf_protect.get_csrf_token_from_request(request)
+#       if not csrf_token:
+#         raise HTTPException(status_code=403, detail="CSRF token missing or invalid")
+#     return response
+
+# @app.get("/csrf")
+# def get_csrf_token(response: Response):
+#   csrf_token = csrf_protect.generate_csrf_token()
+#   response.set_cookie("csrf_token", csrf_token, httponly=True)
+#   return {"csrf_token": csrf_token}
+
+async def async_generate_chunks(request: Request, data: dict):
   try:
     data['years']['start'] = data['years']['start'] + '-01-01'
     data['years']['end'] = data['years']['end'] + '-12-31'
@@ -68,7 +102,7 @@ def generate_response(request, data):
           cursor.execute(
             "SELECT review, address, date, rating FROM reviews "
             "WHERE rating=ANY(%s) AND date "
-            "BETWEEN %s AND %s AND address=%s AND review LIKE %s ORDER BY RONDOM() LIMIT %s;", [ratings, data['years']['start'], data['years']['end'], data['state'], '%'+data['product']+'%', LIMIT])
+            "BETWEEN %s AND %s AND address=%s AND review LIKE %s ORDER BY RANDOM() LIMIT %s;", [ratings, data['years']['start'], data['years']['end'], data['state'], '%'+data['product']+'%', LIMIT])
           for review in cursor:
             nodes.append(TextNode(text=review[0]))
           if len(ratings) > 1:
@@ -101,32 +135,43 @@ def generate_response(request, data):
               chartdata[str(average[1])] = float(average[0])
 
     yield json.dumps({'chartdata': chartdata, 'chartdata1': chartdata1}) + '\n'
-      
+    await asyncio.sleep(0)  # ensures the yield is flushed
     summary_index = SummaryIndex(nodes)
-
+    if await request.is_disconnected():
+      print("Client disconnected during chart generation")
+      return
     summary_query_engine = summary_index.as_query_engine(
       response_mode="simple_summarize",
       use_async=True,
     )
+    print('before')
+    loop = asyncio.get_event_loop()
     if data['product']:
-      summary = summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews from several starbucks locations about specifically the {data['product']}?")
+      summary = await loop.run_in_executor(None, lambda: summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews from several starbucks locations about specifically the {data['product']}?"))
     else:
-      summary = summary_query_engine.query("In 150 words or less, summarize these cocatenated reviews from several starbucks locations")
-
+      summary = await loop.run_in_executor(None, lambda: summary_query_engine.query("In 150 words or less, summarize these concatenated reviews from several starbucks locations"))
+    print('after')
     yield json.dumps({'db': str(summary)}) + '\n'
-  except GeneratorExit:
-    print("Client disconnected early.")
+    await asyncio.sleep(0)  # ensures the yield is flushed
+
+    if await request.is_disconnected():
+      print("Client disconnected before summary")
+      return
+  
+  except RateLimitError:
+    yield json.dumps({'db': 'Rate limit reached. Please try again after a minute.'})
   except Exception as e:
-    print("Streaming error:", e)
-  except BrokenPipeError:
-    print('client stopped the request')
+    print("Streaming error:", e)  
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-@method_decorator(csrf_exempt, name='dispatch')
-class StreamingView(View):
-    def post(self, request):
-        body = json.loads(request.body)
-        # schema = ParamsSchema(**body)
-        return StreamingHttpResponse(generate_response(request, body), content_type='application/json')
+class Item(BaseModel):
+  years: dict[str, str]
+  state: str
+  ratings: list[str]
+  product: str
+
+@app.post("/api/")
+async def async_stream(request: Request, payload: Item):
+  data = payload.model_dump()
+  print(data, flush=True)
+  return StreamingResponse(async_generate_chunks(request, data), media_type='test/event-stream')
