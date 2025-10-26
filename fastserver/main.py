@@ -11,6 +11,7 @@ from pydantic import BaseModel
 import json
 import os
 import asyncio
+import random
 from llama_index.core.schema import TextNode
 from llama_index.core import get_response_synthesizer
 from llama_index.core import SummaryIndex
@@ -43,7 +44,7 @@ os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 llm = Groq(model="llama-3.1-8b-instant")
 
 Settings.llm = Groq(model="llama-3.1-8b-instant")
-Settings.embed_model = HuggingFaceEmbedding()
+# Settings.embed_model = HuggingFaceEmbedding()
 
 app = FastAPI()
 
@@ -55,21 +56,7 @@ app.add_middleware(
     allow_credentials=True,
 )
 
-# @app.middleware("http")
-# async def add_csrf_header(request, call_next):
-#     response = await call_next(request)
-#     if request.method in ["POST", "PUT", "DELETE"]:
-#       # Ensure CSRF protection
-#       csrf_token = csrf_protect.get_csrf_token_from_request(request)
-#       if not csrf_token:
-#         raise HTTPException(status_code=403, detail="CSRF token missing or invalid")
-#     return response
 
-# @app.get("/csrf")
-# def get_csrf_token(response: Response):
-#   csrf_token = csrf_protect.generate_csrf_token()
-#   response.set_cookie("csrf_token", csrf_token, httponly=True)
-#   return {"csrf_token": csrf_token}
 
 async def async_generate_chunks(request: Request, data: dict):
   try:
@@ -83,7 +70,8 @@ async def async_generate_chunks(request: Request, data: dict):
     chartdata = {}
     chartdata1 = {}
     nodes = []
-    LIMIT = 2000
+    LIMIT = 20000
+    SUBSET = 10
     with connection.cursor() as cursor:
       if data['product']:
         if data['state'] == 'all':
@@ -136,7 +124,14 @@ async def async_generate_chunks(request: Request, data: dict):
 
     yield json.dumps({'chartdata': chartdata, 'chartdata1': chartdata1}) + '\n'
     await asyncio.sleep(0)  # ensures the yield is flushed
-    summary_index = SummaryIndex(nodes)
+
+    # get subset of reviews for faster responses, increase subset size for more detailed/accurate responses
+    review_subset = []
+    n = SUBSET if len(nodes) >= 10 else len(nodes)
+    random_indexes = random.sample(range(len(nodes)), n)
+    for i in random_indexes:
+      review_subset.append(nodes[i])
+    summary_index = SummaryIndex(review_subset)
     if await request.is_disconnected():
       print("Client disconnected during chart generation")
       return
@@ -144,13 +139,11 @@ async def async_generate_chunks(request: Request, data: dict):
       response_mode="simple_summarize",
       use_async=True,
     )
-    print('before')
     loop = asyncio.get_event_loop()
     if data['product']:
       summary = await loop.run_in_executor(None, lambda: summary_query_engine.query(f"In 150 words or less, summarize these concatenated reviews from several starbucks locations about specifically the {data['product']}?"))
     else:
       summary = await loop.run_in_executor(None, lambda: summary_query_engine.query("In 150 words or less, summarize these concatenated reviews from several starbucks locations"))
-    print('after')
     yield json.dumps({'db': str(summary)}) + '\n'
     await asyncio.sleep(0)  # ensures the yield is flushed
 

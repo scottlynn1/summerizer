@@ -3,7 +3,6 @@ import Chart from 'chart.js/auto'
 import { Bar } from 'react-chartjs-2';
 import { Line } from 'react-chartjs-2';
 import './App.css'
-// import { sign } from 'chart.js/helpers';
 const states_abbr = {AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware',
   FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', 
   MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
@@ -11,25 +10,7 @@ const states_abbr = {AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas',
   PA: 'Pennsylvania', RI:'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
   WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'};
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-// let _csrfToken = null;
 
-
-// function getCsrfToken() {
-//   const csrfToken = document.cookie.split('; ')
-//     .find(row => row.startsWith('csrf_token='))
-//     ?.split('=')[1];
-//   return csrfToken;
-// }
-// async function getCsrfToken() {
-//   if (_csrfToken === null) {
-//     const response = await fetch(`${API_BASE}/csrf/`, {
-//       // credentials: 'include',
-//     });
-//     const data = await response.json();
-//     _csrfToken = data.csrfToken;
-//   }
-//   return _csrfToken
-// }
 
 function ContainerComp() {
   const [summary, setSummary] = useState('');
@@ -113,76 +94,73 @@ function ContainerComp() {
       }
     }
   };
-    
-
-
-
 
   return (
-    <>
-      <header className='header text-center text-3xl p-2 bg-blue-100 rounded-2xl my-4'>
-        User interface to query the starbucks reviews dataset
-      </header>
-      
+  <>
+    <header className='text-center text-md p-2 bg-blue-100 rounded-2xl my-4' role="banner">
+      <h1>User interface to query the starbucks reviews dataset</h1>
+    </header>
+    
+    <main role="main">
       <div className='flex flex-col min-[1570px]:flex-row min-[995px]:mx-[20px] items-center justify-center'>
         <div className='flex-3 flex flex-col mx-4'>
           <div className='flex flex-col min-[995px]:flex-row items-center m-4'>
-            <div className='box min-w-[400px] m-4 p-2'>
+            <div className='box min-w-[400px] m-4 p-2' role="form" aria-label="Review filter form">
               <MyForm loading={loading} getSummary={getSummary}/>
             </div>
-            <div className='box w-full max-w-[650px] min-h-[410px] min-[995px]:min-w-[550px] '>
+            <div className='box w-full max-w-[650px] min-h-[410px] min-[995px]:min-w-[550px]' role="region" aria-label="Review summary">
               <h2 className='border-b-2'>Summary</h2>
               <MySummary summary={summary} isloading={isloading}/>
             </div>
           </div>
-          <div className='box m-4 max-w-[1085px]'>
+          <div className='box m-4 max-w-[1085px]' role="region" aria-label="Yearly ratings chart">
             <h2 className='border-b-2'>Average Rating by Year</h2>
             <div className='flex min-w-0 min-h-0 flex-col min-[880px]:flex-row min-[880px]:min-w-128'>
-              <div className='chart flex-2 w-full min-h-0 min-w-0 max-h-75 m-auto mt-2 p-2 aspect-9/16'>
-                    <div className='w-full h-full'>
-                      <LineChart linechartdata={linechartdata}/>
-                    </div>
+              <div className='chart flex-2 w-full min-h-0 min-w-0 max-h-75 m-auto mt-2 p-2 aspect-9/16' role="img" aria-label="Line chart showing average ratings by year">
+                <div className='w-full h-full'>
+                  <LineChart linechartdata={linechartdata}/>
+                </div>
               </div>
-              <div className='flex-1 px-2 mt-4'>
+              <div className='flex-1 px-2 mt-4' role="complementary" aria-label="Yearly statistics">
                 <div className='p-2 my-2 text-2xl'>
-                  <p className='text-data'>Best Year <span className='data-numbers'>{largestIncrease ? Math.max(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>
+                  <p className='text-data'>Best Year <span className='data-numbers' aria-label="Rating">{largestIncrease ? Math.max(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>
                 </div>
                 <div className='p-2 my-2 text-2xl border-t-1'>
-                  <p className='text-data'>Worst Year <span className='data-numbers'>{largestDecrease ? Math.min(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>                  
+                  <p className='text-data'>Worst Year <span className='data-numbers' aria-label="Rating">{largestDecrease ? Math.min(...Object.values(linechartdata)).toFixed(2) : '--'}</span></p>                  
                 </div>
                 <div className='p-2 my-2 text-2xl border-t-1'>
-                  <p className='text-data'>Greatest Increase  </p>
-                  <p className='data-numbers'>{largestIncrease.toFixed(2)} from {ifrom} to {ito}</p>
+                  <p className='text-data'>Greatest Increase</p>
+                  <p className='data-numbers' aria-label={`Increase of ${largestIncrease.toFixed(2)} from ${ifrom} to ${ito}`}>{largestIncrease.toFixed(2)} from {ifrom} to {ito}</p>
                 </div>
                 <div className='p-2 my-2 text-2xl border-t-1'>
-                  <p className='text-data'>Greatest Decrease  <span></span></p>
-                  <p className='data-numbers'>{largestDecrease.toFixed(2)} from {dfrom} to {dto}</p>
+                  <p className='text-data'>Greatest Decrease</p>
+                  <p className='data-numbers' aria-label={`Decrease of ${largestDecrease.toFixed(2)} from ${dfrom} to ${dto}`}>{largestDecrease.toFixed(2)} from {dfrom} to {dto}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div className='flex-2'>
-          <div className='box m-4 '>
+          <div className='box m-4' role="region" aria-label="State ratings chart">
             <h2 className='border-b-2'>Average Rating by State</h2>
             <div className='flex flex-col min-[650px]:flex-row mt-4 h-184'>
-              <div className='chart flex-2 overflow-y-auto my-2 min-w-[200px] p-4 items-stretch max-w-76'>
+              <div className='chart flex-2 overflow-y-auto my-2 min-w-[200px] p-4 items-stretch max-w-76' role="img" aria-label="Bar chart showing average ratings by state">
                 <div className='aspect-4/18'>
                   <BarChart barchartdata={barchartdata}/>
                 </div>
               </div>
-              <div className='flex-1 '>
+              <div className='flex-1' role="complementary" aria-label="State rankings">
                 <div>
-                  <p className='p-2 my-2 text-2xl text-data'>Top 3 States<span></span></p>
+                  <p className='p-2 my-2 text-2xl text-data'>Top 3 States</p>
                   <div className='p-2 my-2 text-2xl border-t-1'>
                     {Object.keys(barchartdata).slice(0,3).map((state, index) => (
-                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
+                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers' role="listitem">{`${states_abbr[state]}`}</p>
                     ))}
                   </div>
-                  <p className='p-2 my-2 text-2xl text-data'>Bottom 3 States<span></span></p>
+                  <p className='p-2 my-2 text-2xl text-data'>Bottom 3 States</p>
                   <div className='p-2 my-2 text-2xl border-t-1'>
                     {Object.keys(barchartdata).slice(-3).reverse().map((state, index) => (
-                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers'>{`${states_abbr[state]}`}</p>
+                      <p key={index} className='border-b-1 border-dashed p-2 data-numbers' role="listitem">{`${states_abbr[state]}`}</p>
                     ))}
                   </div>
                 </div>
@@ -191,11 +169,12 @@ function ContainerComp() {
           </div>
         </div>
       </div>
+    </main>
 
-      <footer className="footer bg-blue-100 p-2 text-center py-6 mt-6">
-        <p className="">© 2025 Scott Lynn. All rights reserved.</p>
-      </footer>
-    </>
+    <footer className="footer bg-blue-100 p-2 text-center py-6 mt-6" role="contentinfo">
+      <p>© 2025 Scott Lynn. All rights reserved.</p>
+    </footer>
+  </>
   )
 }
 
@@ -271,81 +250,121 @@ function MyForm({loading, getSummary}) {
   const yearslist = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
 
   return (
-      <form onSubmit={handleSubmit} className='flex flex-col text-center'>
-        <div className='p-2'>
-          <p className='font-semibold mb-2'>Date Range</p>
-          <p style={{display: yearserror}} className={failsubmit}>End year cannot be less than start year</p>
-          <div>
-            <div className='m-2'>
-              <label className='m-1' htmlFor='start'>Starting Year</label>
-              <select onChange={onDateselect} className='border p-2 rounded-s-sx input-bg' id="start" name='start'>
-                {yearslist.map((year, index) => {
-                  return (
-                    <option key={index} value={year}>{year}</option>
-                  )
-                })}
-              </select>
-            </div>
-            <div className='m-2'>
-              <label className='m-1' htmlFor='end'>Ending Year</label>
-              <select onChange={onDateselect} className='border p-2 rounded-s-sx input-bg' id="end" name='end' value={years.end}>
-                {yearslist.map((year, index) => {
-                  return (
-                    <option key={index} value={year}>{year}</option>
-                  )
-                })}
-              </select>
-            </div>
+    <form 
+      onSubmit={handleSubmit} 
+      className='flex flex-col text-center'
+      aria-label="Review filter options"
+    >
+      <div className='p-2' role="group" aria-labelledby="date-range-title">
+        <p id="date-range-title" className='font-semibold mb-2'>Date Range</p>
+        {yearserror === 'block' && (
+          <p 
+            className={`${failsubmit}`}
+            role="alert"
+            aria-live="polite"
+          >
+            End year cannot be less than start year
+          </p>
+        )}
+        <div className='flex flex-col'>
+          <div className='m-2'>
+            <label className='m-1' htmlFor='start'>Starting Year</label>
+            <select 
+              onChange={onDateselect} 
+              className='border p-2 rounded-s-sx input-bg' 
+              id="start" 
+              name='start'
+              aria-required="true"
+              aria-invalid={yearserror === 'block'}
+            >
+              {yearslist.map((year, index) => (
+                <option key={index} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          <div className='m-2'>
+            <label className='m-1' htmlFor='end'>Ending Year</label>
+            <select 
+              onChange={onDateselect} 
+              className='border p-2 rounded-s-sx input-bg' 
+              id="end" 
+              name='end' 
+              value={years.end}
+              aria-required="true"
+              aria-invalid={yearserror === 'block'}
+            >
+              {yearslist.map((year, index) => (
+                <option key={index} value={year}>{year}</option>
+              ))}
+            </select>
           </div>
         </div>
-        <div className='font-semibold p-2'>
+      </div>
+
+      <div className='font-semibold p-2'>
         <label className='p-2' htmlFor='state'>State</label>
-        <select onChange={onStateselect} className='border p-2 rounded-s-sx input-bg' id="state" name='state'>
+        <select 
+          onChange={onStateselect} 
+          className='border p-2 rounded-s-sx input-bg' 
+          id="state" 
+          name='state'
+          aria-label="Select a state"
+        >
           <option value='all'>All</option>
-          {Object.keys(states_abbr).map((state, index) => {
-            return (
-              <option key={index} value={state}>{states_abbr[state]}</option>
-            )
-          })}
+          {Object.keys(states_abbr).map((state, index) => (
+            <option key={index} value={state}>{states_abbr[state]}</option>
+          ))}
         </select>
+      </div>
+
+      <fieldset className='p-2'>
+        <legend className={`font-semibold ${selyears}`}>
+          Select Review Ratings
+          {ratings.length === 0 && (
+            <span className="sr-only">(Required)</span>
+          )}
+        </legend>
+        <div 
+          className='flex justify-between' 
+          role="group" 
+          aria-label="Star ratings options"
+        >
+          {[1,2,3,4,5].map(rating => (
+            <div key={rating}>
+              <input 
+                className='m-1 input-bg' 
+                onChange={onCheckbox} 
+                type="checkbox" 
+                id={`rating${rating}`} 
+                name="ratings" 
+                value={rating}
+                aria-label={`${rating} star rating`}
+              />
+              <label htmlFor={`rating${rating}`}>{rating} Star</label>
+            </div>
+          ))}
         </div>
-        <fieldset className='p-2'>
-        <div className='font-semibold'>
-        <legend className={selyears}>Select Review Ratings</legend>
-        </div>
-        <div className='flex justify-between'>
-          <div>
-            <input className='m-1 input-bg' onChange={onCheckbox} type="checkbox" id='rating1' name="ratings" value="1" />
-            <label htmlFor="ratings1">1 Star</label>
-          </div>
-          <div>
-            <input className='m-1 input-bg' onChange={onCheckbox} type="checkbox" id='rating2' name="ratings" value="2" />
-            <label htmlFor="ratings2">2 Star</label>
-          </div>
-          <div>
-            <input className='m-1 input-bg' onChange={onCheckbox} type="checkbox" id='rating3' name="ratings" value="3" />
-            <label htmlFor="ratings3">3 Star</label>
-          </div>
-          <div>
-            <input className='m-1 input-bg' onChange={onCheckbox} type="checkbox" id='rating4' name="ratings" value="4" />
-            <label htmlFor="ratings4">4 Star</label>
-          </div>
-          <div>
-            <input className='m-1 input-bg' onChange={onCheckbox} type="checkbox" id='rating5' name="ratings" value="5" />
-            <label htmlFor="ratings5">5 Star</label>
-          </div>
-        </div>
-        </fieldset>
-        <div className='font-semibold'>
+      </fieldset>
+
+      <div className='font-semibold'>
         <label htmlFor='product'>Product/Service (optional)</label>
-        </div>
-        <select onChange={productSelect} className='border p-2 rounded-s-sx input-bg' id="product" name='product'>
+      </div>
+      <select 
+        onChange={productSelect} 
+        className='border p-2 rounded-s-sx input-bg' 
+        id="product" 
+        name='product'
+        aria-label="Select a product or service (optional)"
+      >
+        <optgroup label="General">
           <option value="">Choose a Product/Service</option>
-          <option disabled>------------------</option>
+        </optgroup>
+        <optgroup label="Services">
           <option value="mobile order">Mobile Order System</option>
           <option value="drive thru">The Drive Through</option>
           <option value="in store">In Store Experience</option>
-          <option disabled>------------------</option>
+        </optgroup>
+        <optgroup label="Beverages">
           <option value="white chocolate mocha">White Chocolate Mocha</option>
           <option value="pumpkin spice latte">Pumpkin Spice Latte</option>
           <option value="green tea latte">Green Tea Latte</option>
@@ -355,15 +374,27 @@ function MyForm({loading, getSummary}) {
           <option value="cinnamon dolce latte">Cinnamon Dolce Latte</option>
           <option value="chai tea latte">Chai Tea Latte</option>
           <option value="espresso">Espresso</option>
-          
+        </optgroup>
+      </select>
 
-        </select>
-        <button className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-2' type='submit'>
-          <div className='flex justify-center'>
-            <div style={{display: loading}} className='animate-spin bg-sky-100 mr-2 rounded-full border-t-indigo-500 border-t-3 h-8 w-8'></div><div className='p-2'>Submit</div>
-          </div>
-        </button>
-      </form>
+      <button 
+        className='border-sky-100 border-2 hover:border-blue-600 bg-sky-100 p-1 transition-all duration-325 rounded-md m-2' 
+        type='submit'
+        disabled={yearserror === 'block' || ratings.length === 0}
+        aria-busy={loading === 'block'}
+      >
+        <div className='flex justify-center items-center'>
+          {loading === 'block' && (
+            <div 
+              className='animate-spin bg-sky-100 mr-2 rounded-full border-t-indigo-500 border-t-3 h-8 w-8'
+              role="status"
+              aria-label="Loading"
+            />
+          )}
+          <div className='p-2'>Submit</div>
+        </div>
+      </button>
+    </form>
   );
 }
 
@@ -374,15 +405,21 @@ function MyForm({loading, getSummary}) {
 
 function MySummary({summary, isloading}) {
   return (
-      <div className={summary ? 'p-2 m-2 font-display font-medium text-lg data-numbers fade-in' : 'p-2 m-2 font-display font-medium text-lg data-numbers'}>
-        {isloading ? 
-        <div className='loader'>
+    <div 
+      className={summary ? 'p-2 m-2 font-display font-medium text-lg data-numbers fade-in' : 'p-2 m-2 font-display font-medium text-lg data-numbers'}
+      role="status"
+      aria-live="polite"
+      aria-busy={isloading}
+    >
+      {isloading ? 
+        <div className='loader' role="status" aria-label="Loading summary">
           <span></span>
           <span></span>
           <span></span>
-        </div> : <></> }
-        {summary}
-      </div>
+        </div> : <></> 
+      }
+      {summary}
+    </div>
   )
 }
 
@@ -410,7 +447,7 @@ function LineChart({linechartdata}) {
       {
         label: 'Average Ratings by Year',
         data: Object.values(linechartdata),
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        backgroundColor: 'rgba(58, 47, 112, 0.5)',
       },
     ],
   };
@@ -442,7 +479,7 @@ function BarChart({barchartdata}) {
       {
         label: 'Average Ratings by State',
         data: Object.values(barchartdata),
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        backgroundColor: 'rgba(58, 47, 112, 0.5)',
       },
     ],
   };
